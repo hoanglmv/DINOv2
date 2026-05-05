@@ -1,0 +1,47 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T5]{fontenc}
+\usepackage[vietnamese]{babel}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+
+\title{\textbf{Báo cáo Dự án Môn học: Thị giác Máy tính}\\
+\large Tóm tắt và Thực nghiệm bài báo: DINOv2}
+\author{Nhóm sinh viên}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Tóm tắt nội dung bài báo DINOv2}
+
+\subsection{Bài toán (Problem)}
+Trong lĩnh vực thị giác máy tính, việc học các đặc trưng hình ảnh mạnh mẽ và có thể tổng quát hóa thường phụ thuộc rất lớn vào dữ liệu được gán nhãn thủ công. Quá trình gán nhãn này rất tốn kém và không thể mở rộng. Bài toán đặt ra là làm thế nào để huấn luyện một mô hình có khả năng trích xuất đặc trưng hình ảnh chất lượng cao mà không cần sử dụng nhãn dữ liệu (học tự giám sát - self-supervised learning).
+
+\subsection{Động lực (Motivation)}
+Các mô hình Transformer trong xử lý ngôn ngữ tự nhiên đã chứng minh rằng huấn luyện trên lượng dữ liệu khổng lồ có thể tạo ra các đặc trưng đủ tốt cho mọi tác vụ. Động lực chính của nhóm tác giả (Meta AI) là xây dựng một hệ thống để thu thập, tinh lọc tập dữ liệu khổng lồ không cần nhãn (LVD-142M) và tối ưu hóa kiến trúc Vision Transformer (ViT) để tạo ra mô hình nền tảng (Foundation Model) cho hình ảnh.
+
+\subsection{Phương pháp (Method)}
+\begin{itemize}
+    \item \textbf{Dữ liệu:} Xây dựng pipeline tự động để lọc hình ảnh chất lượng cao từ web, tạo ra bộ dữ liệu LVD-142M.
+    \item \textbf{Thuật toán:} Kết hợp DINO (Self-distillation) và iBOT (Masked Image Modeling).
+    \item \textbf{Tối ưu quy mô:} Sử dụng FlashAttention, Fully Sharded Data Parallel (FSDP), và chưng cất mô hình để nén từ ViT-g xuống các mô hình nhỏ hơn.
+\end{itemize}
+
+\subsection{Kết quả (Result)}
+DINOv2 đạt độ chính xác cực cao trên ImageNet-1K chỉ bằng phân loại tuyến tính hoặc k-NN. Vượt trội hơn các mô hình SSL trước đây trên các tác vụ yêu cầu mức độ pixel (dense tasks) như Semantic Segmentation và Depth Estimation. Các đặc trưng bảo toàn rất tốt cấu trúc không gian.
+
+\subsection{Đóng góp (Contribution)}
+Cung cấp bộ mô hình DINOv2 mã nguồn mở, tạo ra tập dữ liệu chất lượng cao LVD-142M và đề xuất các kỹ thuật huấn luyện hiệu quả giúp ổn định khi scale mô hình ViT.
+
+\section{Thực nghiệm Code}
+(Nội dung đang được cập nhật)
+
+\section{Đánh giá và Critical Thinking}
+(Nội dung đang được cập nhật)
+
+\end{document}
