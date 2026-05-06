@@ -42,6 +42,25 @@ Cung cấp bộ mô hình DINOv2 mã nguồn mở, tạo ra tập dữ liệu ch
 (Nội dung đang được cập nhật)
 
 \section{Đánh giá và Critical Thinking}
-(Nội dung đang được cập nhật)
+
+\subsection{Điểm mạnh của mô hình}
+\begin{itemize}
+    \item \textbf{Đặc trưng mang tính tổng quát cao:} Mô hình có thể sử dụng ngay (out-of-the-box) mà không cần fine-tune cho nhiều tác vụ khác nhau, từ phân loại ảnh đến ước lượng chiều sâu hay phân đoạn ngữ nghĩa.
+    \item \textbf{Hiểu ngữ nghĩa và cấu trúc không gian:} Các đặc trưng học được từ DINOv2 bảo toàn tốt ranh giới vật thể (object boundaries) và tương quan ngữ nghĩa giữa các thành phần trong ảnh, một điều rất hiếm thấy ở các mô hình phân loại thông thường.
+    \item \textbf{Dễ dàng tích hợp:} Bằng cách đóng băng (freeze) trọng số DINOv2 và chỉ thêm một lớp Linear, người dùng có thể xây dựng các ứng dụng Computer Vision mạnh mẽ với chi phí tính toán siêu thấp.
+\end{itemize}
+
+\subsection{Điểm hạn chế}
+\begin{itemize}
+    \item \textbf{Chi phí huấn luyện khổng lồ:} Để tạo ra DINOv2, Meta đã tiêu tốn lượng lớn năng lượng và GPU để tiền xử lý 142 triệu ảnh và huấn luyện ViT-g. Điều này nằm ngoài tầm với của các viện nghiên cứu hoặc doanh nghiệp vừa và nhỏ nếu muốn tự huấn luyện từ đầu.
+    \item \textbf{Kích thước mô hình:} Mặc dù có các bản nhỏ (ViT-Small), nhưng để đạt được hiệu suất tốt nhất, bản ViT-Giant khá nặng, gây khó khăn cho việc suy luận (inference) trên các thiết bị Edge (IoT/Mobile).
+\end{itemize}
+
+\subsection{Khả năng áp dụng thực tế và Giới hạn}
+\textbf{Khả năng áp dụng:}
+DINOv2 rất lý tưởng để làm nền tảng cho các bài toán thiếu dữ liệu gán nhãn (few-shot/zero-shot learning). Ví dụ: y tế (phát hiện khối u từ ảnh X-quang), nông nghiệp (phân tích sự phát triển của cây trồng), hoặc xe tự lái (ước lượng chiều sâu khung cảnh).
+
+\textbf{Trường hợp có thể thất bại (Failure cases):}
+Mô hình có thể không hoạt động tốt khi áp dụng vào các ảnh có miền hình ảnh (domain) quá khác biệt so với tập LVD-142M ban đầu, chẳng hạn như ảnh siêu âm, ảnh radar, hoặc ảnh chụp từ vệ tinh với phổ hồng ngoại. Ngoài ra, việc thiếu khả năng sinh ảnh (generative capabilities) khiến nó không thể cạnh tranh với các mô hình Diffusion ở khía cạnh tạo sinh nội dung.
 
 \end{document}
