@@ -1,0 +1,1 @@
+DINOV2 là Foundation Model để trích xuất đặc trưng nma t cái này nói tỏng báo r ta làm thêm vài cái ứng dụng rồi so sánh với các model khác đi 

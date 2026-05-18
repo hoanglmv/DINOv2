@@ -1,0 +1,63 @@
+\section{Chương 2: Thực nghiệm đánh giá DINOv2}
+
+\subsection{Mô tả tập dữ liệu (Dataset Description)}
+Để kiểm chứng khả năng trích xuất đặc trưng của DINOv2 trong một miền dữ liệu hẹp, nhóm quyết định sử dụng bộ dữ liệu y tế \textbf{SkinCancerMNIST (HAM10000)}. Đây là một tập dữ liệu ảnh da liễu với độ khó cao do các bệnh lý về da thường có màu sắc và kết cấu bề mặt rất giống nhau.
+\begin{itemize}
+    \item \textbf{Số lượng:} 10,015 hình ảnh đa dạng về tổn thương da.
+    \item \textbf{Phân loại:} 7 lớp bệnh lý (Ví dụ: Melanoma, Basal cell carcinoma, v.v.).
+    \item \textbf{Thách thức:} Tập dữ liệu bị mất cân bằng nghiêm trọng (imbalanced), đòi hỏi mô hình phải có khả năng hiểu các đặc trưng tinh vi thay vì chỉ học vẹt theo tần suất xuất hiện.
+\end{itemize}
+
+\subsection{Thiết lập thực nghiệm (Experiment Setup)}
+Thực nghiệm được triển khai với cấu hình như sau:
+\begin{itemize}
+    \item \textbf{Mô hình kiểm chứng (Baseline):} ResNet50 (Huấn luyện có giám sát toàn bộ mạng) và CLIP ViT-B/32 (Linear Probe).
+    \item \textbf{Mô hình DINOv2:} Sử dụng phiên bản \texttt{dinov2\_vitb14} với toàn bộ trọng số (backbone) được đóng băng (freeze). Chỉ có một lớp phân loại tuyến tính (Linear Head) duy nhất được cập nhật trọng số.
+    \item \textbf{Siêu tham số (Hyperparameters):}
+    \begin{itemize}
+        \item Batch size: 32
+        \item Số Epochs: 10
+        \item Tốc độ học (Learning Rate): $10^{-3}$ với Adam Optimizer
+        \item Loss Function: CrossEntropy Loss
+    \end{itemize}
+\end{itemize}
+
+\subsection{Kết quả và Trực quan hóa (Results)}
+Sau 10 Epochs huấn luyện, các mô hình hội tụ và cho ra kết quả được thể hiện qua các đồ thị dưới đây.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/convergence.png}
+    \caption{Tốc độ hội tụ (Validation Loss) của các mô hình}
+    \label{fig:convergence}
+\end{figure}
+
+Như quan sát trên Hình \ref{fig:convergence}, mô hình DINOv2 (đường màu đỏ) cho thấy tốc độ hội tụ rất nhanh ngay từ những epoch đầu tiên. Điều này chứng tỏ bộ đặc trưng ban đầu mà DINOv2 cung cấp đã chứa sẵn hàm lượng thông tin cực kỳ cao, giúp lớp phân loại (Linear Head) dễ dàng tìm được ranh giới quyết định. Ngược lại, ResNet50 mất nhiều thời gian hơn để tinh chỉnh toàn bộ các tầng chập (convolutional layers).
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/performance_bar.png}
+    \caption{So sánh hiệu năng (Accuracy và F1-Score) trên tập Test}
+    \label{fig:performance}
+\end{figure}
+
+Bảng \ref{tab:results} trình bày kết quả chi tiết thu được sau quá trình kiểm thử trên tập dữ liệu chưa từng thấy (Test set).
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|l|l|c|c|}
+    \hline
+    \textbf{Mô hình} & \textbf{Phương pháp} & \textbf{Test Accuracy (\%)} & \textbf{Test F1-Score (\%)} \\
+    \hline
+    \textbf{DINOv2} & Linear Probing & \textbf{80.48} & \textbf{78.91} \\
+    ResNet50 & Supervised Fine-tuning & 79.43 & 78.57 \\
+    CLIP & Linear Probing & 79.33 & 78.19 \\
+    \hline
+    \end{tabular}
+    \caption{Bảng tổng hợp kết quả hiệu năng của các mô hình}
+    \label{tab:results}
+\end{table}
+
+Về mặt hiệu năng tổng thể (Hình \ref{fig:performance} và Bảng \ref{tab:results}), DINOv2 đạt được độ chính xác (Accuracy: 80.48\%) và điểm F1-Score (78.91\%) cao nhất, vượt qua cả CLIP và mô hình tham chiếu ResNet50. 
+Mặc dù CLIP là mô hình nền tảng mạnh mẽ (Accuracy đạt 79.33\%), nhưng do được học qua sự ghép nối (alignment) với văn bản, nó có xu hướng nắm bắt các khái niệm tổng quát (global concepts) thay vì các chi tiết cấu trúc cục bộ tinh vi trên da như DINOv2.
+ResNet50 (Supervised) cũng đạt kết quả tương đối tốt (79.43\%) do được huấn luyện tinh chỉnh toàn bộ, nhưng lại tốn kém tài nguyên và thời gian tính toán hơn rất nhiều so với phương pháp Linear Probe của DINOv2 (vốn chỉ cần cập nhật trọng số của một lớp phân loại duy nhất).

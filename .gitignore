@@ -17,6 +17,7 @@ venv.bak/
 
 # Data and models (Không đưa dataset hoặc pre-trained weights lên Git)
 data/
+dataset/SkinCancerMNIST/
 *.pth
 *.pt
 *.onnx

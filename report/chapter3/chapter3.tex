@@ -1,0 +1,24 @@
+\section{Chương 3: Đánh giá và Tư duy Tích cực (Critical Thinking)}
+
+\subsection{Điểm mạnh của phương pháp (Strengths)}
+Dựa trên kết quả thực nghiệm với tập dữ liệu y tế SkinCancerMNIST, có thể rút ra những điểm mạnh cốt lõi của DINOv2:
+\begin{itemize}
+    \item \textbf{Đặc trưng "Out-of-the-box" sâu sắc:} Khác với các phương pháp SSL cũ, DINOv2 cung cấp một bộ trọng số cực kỳ chất lượng. Ngay cả khi chưa hề nhìn thấy ảnh nội soi da liễu trong quá trình huấn luyện, mô hình vẫn trích xuất được những vector đặc trưng có khả năng phân tách cao. Điều này giúp lớp Linear Probe hội tụ nhanh chóng và đạt độ chính xác gần tương đương với mạng ResNet50 được huấn luyện có giám sát từ đầu.
+    \item \textbf{Vượt qua "Nút thắt ngôn ngữ":} So với CLIP (phụ thuộc vào mô tả văn bản), DINOv2 chứng tỏ sự ưu việt trong các bài toán y tế. Ảnh da liễu chứa những chi tiết cực kỳ tinh vi về kết cấu (texture) và hình học (geometry) mà ngôn ngữ tự nhiên không thể miêu tả hết (ví dụ: "viền bất đối xứng", "màu sắc không đồng đều li ti"). DINOv2 học thuần túy từ hình ảnh nên không bị bỏ sót các thông tin cục bộ này.
+\end{itemize}
+
+\subsection{Điểm hạn chế và Thất bại (Limitations \& Failure Cases)}
+Dù mạnh mẽ, phương pháp vẫn tồn tại những rào cản nhất định:
+\begin{itemize}
+    \item \textbf{Chi phí huấn luyện ban đầu khổng lồ:} Để có được các đặc trưng "vạn năng", Meta AI đã phải dùng đến hàng ngàn GPU để huấn luyện trên 142 triệu hình ảnh. Do đó, việc tự xây dựng một mô hình tương tự DINOv2 từ đầu đối với các nhóm nghiên cứu nhỏ là bất khả thi.
+    \item \textbf{Độ nhạy cảm với dữ liệu ngoài phân phối (Out-of-Distribution):} Mặc dù DINOv2 khái quát hóa rất tốt, nhưng trong các trường hợp cực đoan như ảnh y tế chụp dưới ánh sáng quá yếu hoặc ảnh siêu âm mờ, cấu trúc không gian bị biến dạng hoàn toàn, các đặc trưng của DINOv2 có thể mất tác dụng và dẫn tới phân loại sai (Failure cases).
+    \item \textbf{Thiếu khả năng giải thích (Interpretability):} Trong y tế, việc hiểu tại sao mô hình đưa ra quyết định là tối quan trọng. DINOv2 cung cấp các vector đặc trưng dày đặc nhưng lại khó để bác sĩ hiểu được lớp Linear Probe đang tập trung vào vùng nào của tổn thương da nếu không sử dụng thêm các công cụ như Grad-CAM hoặc Attention Maps.
+\end{itemize}
+
+\subsection{Khả năng áp dụng thực tế (Practical Applications)}
+Từ bài báo DINOv2 và thực nghiệm trên SkinCancerMNIST, tính ứng dụng thực tế của mô hình là rất lớn:
+\begin{itemize}
+    \item \textbf{Hỗ trợ Chẩn đoán Y khoa (Medical Imaging):} Dữ liệu y tế (X-quang, MRI, nội soi) rất phong phú nhưng dữ liệu được gán nhãn bởi chuyên gia lại cực kỳ khan hiếm. DINOv2 mở ra tiềm năng sử dụng trực tiếp các ảnh không nhãn để tạo nền tảng, sau đó chỉ cần một lượng rất nhỏ ảnh có nhãn để huấn luyện lớp Linear Head.
+    \item \textbf{Nông nghiệp thông minh:} Trích xuất đặc trưng của bề mặt lá cây để phát hiện sâu bệnh, phân loại các loại cỏ dại mà không cần tốn công sức thu thập hàng vạn ảnh gán nhãn cho từng khu vực địa lý.
+    \item \textbf{Thị giác Robot và Xe tự lái:} Nhờ khả năng phân đoạn ngữ nghĩa (Semantic Segmentation) và bảo toàn cấu trúc không gian cực tốt, DINOv2 có thể đóng vai trò là "đôi mắt" cốt lõi giúp xe tự lái hoặc robot hiểu sâu sắc về độ sâu và hình học của môi trường xung quanh.
+\end{itemize}

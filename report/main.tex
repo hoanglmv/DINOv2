@@ -8,59 +8,53 @@
 \usepackage{geometry}
 \geometry{a4paper, margin=1in}
 
-\title{\textbf{Báo cáo Dự án Môn học: Thị giác Máy tính}\\
-\large Tóm tắt và Thực nghiệm bài báo: DINOv2}
-\author{Nhóm sinh viên}
-\date{\today}
+\usepackage{tikz}
+\usetikzlibrary{calc}
 
 \begin{document}
 
-\maketitle
+\begin{titlepage}
+    \begin{tikzpicture}[remember picture, overlay]
+        \draw[line width = 2pt] ($(current page.north west) + (2cm,-2cm)$) rectangle ($(current page.south east) + (-1.5cm,2cm)$);
+        \draw[line width = 0.5pt] ($(current page.north west) + (2.1cm,-2.1cm)$) rectangle ($(current page.south east) + (-1.6cm,2.1cm)$);
+    \end{tikzpicture}
+    
+    \begin{center}
+        \vspace*{0.5cm}
+        {\large \textbf{ĐẠI HỌC QUỐC GIA HÀ NỘI}} \\
+        {\large \textbf{TRƯỜNG ĐẠI HỌC CÔNG NGHỆ}} \\
+        \vspace{1.5cm}
+        \includegraphics[width=6.5cm]{logo-uet.jpg} \\
+        \vspace{1.5cm}
+        {\Large \textbf{BÁO CÁO MÔN HỌC THỊ GIÁC MÁY TÍNH}} \\
+        \vspace{2.5cm}
+        {\Large \textbf{BÁO CÁO THỰC NGHIỆM}} \\
+        \vspace{0.5cm}
+        {\Large \textbf{DINOv2: Learning Robust Visual Features without Supervision}} \\
+        \vspace{2.5cm}
+        
+        \begin{table}[h]
+            \centering
+            \large
+            \begin{tabular}{ll}
+                Vũ Minh Hoàng Tùng & : \textbf{22022107} \\
+                Lê Mai Việt Hoàng  & : \textbf{22022191} \\
+                Tạ Đình Kiên       & : \textbf{22022145} \\
+                Nguyễn Quốc Toản   & : \textbf{22022175} \\
+            \end{tabular}
+        \end{table}
+        
+        \vfill
+        {\large \textbf{HÀ NỘI - 2025}}
+        \vspace*{0.5cm}
+    \end{center}
+\end{titlepage}
 
-\section{Tóm tắt nội dung bài báo DINOv2}
+\tableofcontents
+\newpage
 
-\subsection{Bài toán (Problem)}
-Trong lĩnh vực thị giác máy tính, việc học các đặc trưng hình ảnh mạnh mẽ và có thể tổng quát hóa thường phụ thuộc rất lớn vào dữ liệu được gán nhãn thủ công. Quá trình gán nhãn này rất tốn kém và không thể mở rộng. Bài toán đặt ra là làm thế nào để huấn luyện một mô hình có khả năng trích xuất đặc trưng hình ảnh chất lượng cao mà không cần sử dụng nhãn dữ liệu (học tự giám sát - self-supervised learning).
-
-\subsection{Động lực (Motivation)}
-Các mô hình Transformer trong xử lý ngôn ngữ tự nhiên đã chứng minh rằng huấn luyện trên lượng dữ liệu khổng lồ có thể tạo ra các đặc trưng đủ tốt cho mọi tác vụ. Động lực chính của nhóm tác giả (Meta AI) là xây dựng một hệ thống để thu thập, tinh lọc tập dữ liệu khổng lồ không cần nhãn (LVD-142M) và tối ưu hóa kiến trúc Vision Transformer (ViT) để tạo ra mô hình nền tảng (Foundation Model) cho hình ảnh.
-
-\subsection{Phương pháp (Method)}
-\begin{itemize}
-    \item \textbf{Dữ liệu:} Xây dựng pipeline tự động để lọc hình ảnh chất lượng cao từ web, tạo ra bộ dữ liệu LVD-142M.
-    \item \textbf{Thuật toán:} Kết hợp DINO (Self-distillation) và iBOT (Masked Image Modeling).
-    \item \textbf{Tối ưu quy mô:} Sử dụng FlashAttention, Fully Sharded Data Parallel (FSDP), và chưng cất mô hình để nén từ ViT-g xuống các mô hình nhỏ hơn.
-\end{itemize}
-
-\subsection{Kết quả (Result)}
-DINOv2 đạt độ chính xác cực cao trên ImageNet-1K chỉ bằng phân loại tuyến tính hoặc k-NN. Vượt trội hơn các mô hình SSL trước đây trên các tác vụ yêu cầu mức độ pixel (dense tasks) như Semantic Segmentation và Depth Estimation. Các đặc trưng bảo toàn rất tốt cấu trúc không gian.
-
-\subsection{Đóng góp (Contribution)}
-Cung cấp bộ mô hình DINOv2 mã nguồn mở, tạo ra tập dữ liệu chất lượng cao LVD-142M và đề xuất các kỹ thuật huấn luyện hiệu quả giúp ổn định khi scale mô hình ViT.
-
-\section{Thực nghiệm Code}
-(Nội dung đang được cập nhật)
-
-\section{Đánh giá và Critical Thinking}
-
-\subsection{Điểm mạnh của mô hình}
-\begin{itemize}
-    \item \textbf{Đặc trưng mang tính tổng quát cao:} Mô hình có thể sử dụng ngay (out-of-the-box) mà không cần fine-tune cho nhiều tác vụ khác nhau, từ phân loại ảnh đến ước lượng chiều sâu hay phân đoạn ngữ nghĩa.
-    \item \textbf{Hiểu ngữ nghĩa và cấu trúc không gian:} Các đặc trưng học được từ DINOv2 bảo toàn tốt ranh giới vật thể (object boundaries) và tương quan ngữ nghĩa giữa các thành phần trong ảnh, một điều rất hiếm thấy ở các mô hình phân loại thông thường.
-    \item \textbf{Dễ dàng tích hợp:} Bằng cách đóng băng (freeze) trọng số DINOv2 và chỉ thêm một lớp Linear, người dùng có thể xây dựng các ứng dụng Computer Vision mạnh mẽ với chi phí tính toán siêu thấp.
-\end{itemize}
-
-\subsection{Điểm hạn chế}
-\begin{itemize}
-    \item \textbf{Chi phí huấn luyện khổng lồ:} Để tạo ra DINOv2, Meta đã tiêu tốn lượng lớn năng lượng và GPU để tiền xử lý 142 triệu ảnh và huấn luyện ViT-g. Điều này nằm ngoài tầm với của các viện nghiên cứu hoặc doanh nghiệp vừa và nhỏ nếu muốn tự huấn luyện từ đầu.
-    \item \textbf{Kích thước mô hình:} Mặc dù có các bản nhỏ (ViT-Small), nhưng để đạt được hiệu suất tốt nhất, bản ViT-Giant khá nặng, gây khó khăn cho việc suy luận (inference) trên các thiết bị Edge (IoT/Mobile).
-\end{itemize}
-
-\subsection{Khả năng áp dụng thực tế và Giới hạn}
-\textbf{Khả năng áp dụng:}
-DINOv2 rất lý tưởng để làm nền tảng cho các bài toán thiếu dữ liệu gán nhãn (few-shot/zero-shot learning). Ví dụ: y tế (phát hiện khối u từ ảnh X-quang), nông nghiệp (phân tích sự phát triển của cây trồng), hoặc xe tự lái (ước lượng chiều sâu khung cảnh).
-
-\textbf{Trường hợp có thể thất bại (Failure cases):}
-Mô hình có thể không hoạt động tốt khi áp dụng vào các ảnh có miền hình ảnh (domain) quá khác biệt so với tập LVD-142M ban đầu, chẳng hạn như ảnh siêu âm, ảnh radar, hoặc ảnh chụp từ vệ tinh với phổ hồng ngoại. Ngoài ra, việc thiếu khả năng sinh ảnh (generative capabilities) khiến nó không thể cạnh tranh với các mô hình Diffusion ở khía cạnh tạo sinh nội dung.
+\input{chapter1/chapter1.tex}
+\input{chapter2/chapter2.tex}
+\input{chapter3/chapter3.tex}
 
 \end{document}
