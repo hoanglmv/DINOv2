@@ -62,20 +62,18 @@ def get_transforms(model_type="dinov2", is_train=True):
     Tạo các phép biến đổi (transforms) hình ảnh phù hợp với từng loại mô hình.
     Việc chuẩn hóa dữ liệu phải giống hệt lúc mô hình được Pre-train.
     """
-    if model_type == "dinov2" or model_type == "resnet50":
-        # DINOv2 và ResNet50 đều sử dụng chuẩn hóa của ImageNet
+    if model_type in ["dinov2", "vit"]:
+        # Cả DINOv2 và ViT đều sử dụng chuẩn hóa của ImageNet
         mean = [0.485, 0.456, 0.406]
         std = [0.229, 0.224, 0.225]
         target_size = 224
         
         if is_train:
-            # Data augmentation mạnh hơn cho tập Train để tránh overfitting
+            # Data augmentation cho tập Train để tránh overfitting
             return transforms.Compose([
-                transforms.RandomResizedCrop(target_size, scale=(0.7, 1.0)),
+                transforms.RandomResizedCrop(target_size, scale=(0.8, 1.0)),
                 transforms.RandomHorizontalFlip(),
                 transforms.RandomVerticalFlip(),
-                transforms.RandomRotation(90),
-                transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=mean, std=std)
             ])
@@ -87,11 +85,6 @@ def get_transforms(model_type="dinov2", is_train=True):
                 transforms.ToTensor(),
                 transforms.Normalize(mean=mean, std=std)
             ])
-    elif model_type == "clip":
-        import open_clip
-        # OpenCLIP cung cấp sẵn transform đi kèm với trọng số, ta chỉ việc lấy ra dùng
-        _, train_transform, val_transform = open_clip.create_model_and_transforms('ViT-B-32', pretrained='laion2b_s34b_b79k')
-        return train_transform if is_train else val_transform
     else:
         raise ValueError(f"Không hỗ trợ mô hình: {model_type}")
 

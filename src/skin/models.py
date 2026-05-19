@@ -28,48 +28,28 @@ class Dinov2LinearProbe(nn.Module):
         # Đưa vector đặc trưng qua lớp Linear để phân loại
         return self.head(features)
 
-class ResNet50Baseline(nn.Module):
+class VitBaseline(nn.Module):
     """
-    Mô hình tham chiếu (Baseline) sử dụng kiến trúc ResNet50.
-    Mô hình này sẽ được Fine-tune toàn bộ có giám sát.
+    Mô hình tham chiếu (Baseline) sử dụng kiến trúc Vision Transformer (ViT-B/16).
+    Mô hình này sử dụng trọng số pre-trained trên ImageNet (Supervised).
     """
-    def __init__(self, num_classes=7, pretrained=True):
+    def __init__(self, num_classes=7, pretrained=True, freeze_backbone=True):
         super().__init__()
-        # Tải mô hình ResNet50. Sử dụng trọng số có sẵn (ImageNet) nếu pretrained=True
-        weights = models.ResNet50_Weights.DEFAULT if pretrained else None
-        self.backbone = models.resnet50(weights=weights)
+        # Tải mô hình ViT-B_16. Sử dụng trọng số có sẵn (ImageNet) nếu pretrained=True
+        weights = models.ViT_B_16_Weights.DEFAULT if pretrained else None
+        self.backbone = models.vit_b_16(weights=weights)
         
-        # Lấy kích thước đầu vào của lớp Fully Connected cuối cùng trong ResNet50
-        num_ftrs = self.backbone.fc.in_features
-        # Thay thế lớp này bằng một lớp mới phù hợp với số lượng class của SkinCancerMNIST (7)
-        self.backbone.fc = nn.Linear(num_ftrs, num_classes)
-        
-    def forward(self, x):
-        return self.backbone(x)
-
-class ClipLinearProbe(nn.Module):
-    """
-    Mô hình ứng dụng Linear Probing trên Image Encoder của CLIP (OpenCLIP).
-    """
-    def __init__(self, num_classes=7, freeze_backbone=True):
-        super().__init__()
-        import open_clip
-        # Tải Image Encoder của CLIP với kiến trúc ViT-B/32, được huấn luyện trên tập LAION-2B
-        model, _, _ = open_clip.create_model_and_transforms('ViT-B-32', pretrained='laion2b_s34b_b79k')
-        self.backbone = model.visual # Chỉ lấy phần Visual (Image Encoder), bỏ phần Text Encoder
-        
-        # Tương tự như DINOv2, đóng băng mạng Backbone
         if freeze_backbone:
             for param in self.backbone.parameters():
                 param.requires_grad = False
                 
-        # Lấy kích thước đầu ra của CLIP (thường là 512)
-        embed_dim = self.backbone.output_dim
-        self.head = nn.Linear(embed_dim, num_classes)
+        # Lấy kích thước đầu vào của lớp Classification Head cuối cùng trong ViT
+        num_ftrs = self.backbone.heads.head.in_features
+        # Thay thế lớp này bằng một lớp mới phù hợp với số lượng class của SkinCancerMNIST (7)
+        self.backbone.heads.head = nn.Linear(num_ftrs, num_classes)
         
     def forward(self, x):
-        features = self.backbone(x)
-        return self.head(features)
+        return self.backbone(x)
 
 if __name__ == "__main__":
     # Đoạn code kiểm tra nhanh (Sanity checks) kiến trúc mạng và kích thước Tensor đầu ra
@@ -80,12 +60,7 @@ if __name__ == "__main__":
     out_dino = model_dino(dummy_input)
     print("DINOv2 output shape:", out_dino.shape) # Output mong đợi: [2, 7]
     
-    print("Testing ResNet50...")
-    model_resnet = ResNet50Baseline(num_classes=7)
-    out_resnet = model_resnet(dummy_input)
-    print("ResNet50 output shape:", out_resnet.shape) # Output mong đợi: [2, 7]
-    
-    print("Testing CLIP...")
-    model_clip = ClipLinearProbe(num_classes=7)
-    out_clip = model_clip(dummy_input)
-    print("CLIP output shape:", out_clip.shape) # Output mong đợi: [2, 7]
+    print("Testing ViT (ImageNet)...")
+    model_vit = VitBaseline(num_classes=7)
+    out_vit = model_vit(dummy_input)
+    print("ViT output shape:", out_vit.shape) # Output mong đợi: [2, 7]

@@ -8,7 +8,7 @@ from tqdm import tqdm
 from sklearn.metrics import accuracy_score, f1_score, confusion_matrix
 
 from data_loader import get_dataloaders
-from models import Dinov2LinearProbe, ResNet50Baseline, ClipLinearProbe
+from models import Dinov2LinearProbe, VitBaseline
 
 def train_epoch(model, dataloader, criterion, optimizer, device):
     """
@@ -92,27 +92,16 @@ def main(args):
     
     # 2. Khởi tạo Mô hình
     if args.model == "dinov2":
-        model = Dinov2LinearProbe(num_classes=num_classes, freeze_backbone=not args.finetune).to(device)
-    elif args.model == "resnet50":
-        model = ResNet50Baseline(num_classes=num_classes).to(device)
-    elif args.model == "clip":
-        model = ClipLinearProbe(num_classes=num_classes, freeze_backbone=not args.finetune).to(device)
+        model = Dinov2LinearProbe(num_classes=num_classes).to(device)
+    elif args.model == "vit":
+        model = VitBaseline(num_classes=num_classes).to(device)
     else:
         raise ValueError(f"Không nhận diện được mô hình: {args.model}")
         
     # 3. Thiết lập thông số Huấn luyện
     criterion = nn.CrossEntropyLoss()
-    
-    # Thiết lập Learning Rate khác biệt nếu Fine-tune (Backbone LR nhỏ hơn Head LR)
-    if args.finetune and args.model in ["dinov2", "clip"]:
-        optimizer = optim.Adam([
-            {"params": model.backbone.parameters(), "lr": args.lr * 0.1},
-            {"params": model.head.parameters(), "lr": args.lr}
-        ], weight_decay=1e-4)
-    else:
-        optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=1e-4)
-        
-    scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=args.epochs)
+    # model.parameters() với DINOv2 và CLIP thì chỉ có trọng số của head là có requires_grad=True
+    optimizer = optim.Adam(model.parameters(), lr=args.lr)
     
     # Biến theo dõi kết quả để sau này vẽ đồ thị
     history = {
@@ -123,6 +112,7 @@ def main(args):
     }
     
     best_val_acc = 0.0
+    epochs_no_improve = 0
     os.makedirs("logs", exist_ok=True)
     os.makedirs("weights", exist_ok=True)
     
@@ -133,8 +123,6 @@ def main(args):
         train_loss, train_acc = train_epoch(model, train_loader, criterion, optimizer, device)
         val_loss, val_acc, _, _ = evaluate(model, val_loader, criterion, device)
         
-        scheduler.step()
-        
         # Lưu kết quả
         history["train_loss"].append(train_loss)
         history["train_acc"].append(train_acc)
@@ -144,10 +132,16 @@ def main(args):
         print(f"Train Loss: {train_loss:.4f} | Train Acc: {train_acc:.4f}")
         print(f"Val Loss:   {val_loss:.4f} | Val Acc:   {val_acc:.4f}")
         
-        # Chỉ lưu mô hình khi độ chính xác trên tập Validation tăng lên (Early stopping type)
+        # Chỉ lưu mô hình khi độ chính xác trên tập Validation tăng lên (Model Checkpointing)
         if val_acc > best_val_acc:
             best_val_acc = val_acc
             torch.save(model.state_dict(), f"weights/{args.model}_best.pth")
+            epochs_no_improve = 0
+        else:
+            epochs_no_improve += 1
+            if epochs_no_improve >= args.patience:
+                print(f"\n[Early Stopping] Đã dừng sớm! Độ chính xác Validation không cải thiện sau {args.patience} epochs liên tiếp.")
+                break
             
     # 5. Đánh giá cuối cùng trên tập Test
     print("\nTải lại trọng số tốt nhất để chạy đánh giá trên tập Test...")
@@ -168,10 +162,10 @@ def main(args):
 if __name__ == "__main__":
     # Cấu hình để truyền tham số bằng command line
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model", type=str, choices=["dinov2", "resnet50", "clip"], required=True, help="Tên mô hình")
+    parser.add_argument("--model", type=str, choices=["dinov2", "vit"], required=True, help="Tên mô hình")
     parser.add_argument("--batch_size", type=int, default=32, help="Kích thước batch")
-    parser.add_argument("--epochs", type=int, default=10, help="Số epochs")
+    parser.add_argument("--epochs", type=int, default=20, help="Số epochs")
     parser.add_argument("--lr", type=float, default=1e-3, help="Learning rate")
-    parser.add_argument("--finetune", action="store_true", help="Bật Fine-tuning toàn bộ mô hình (unfreeze backbone)")
+    parser.add_argument("--patience", type=int, default=5, help="Số epochs chờ trước khi Early Stopping")
     args = parser.parse_args()
     main(args)

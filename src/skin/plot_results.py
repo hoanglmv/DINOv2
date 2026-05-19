@@ -18,9 +18,9 @@ def plot_convergence():
     Hàm vẽ biểu đồ đường (Line chart) để quan sát tốc độ hội tụ của mô hình (Dựa trên Validation Loss).
     Giúp chứng minh nhận định DINOv2 hội tụ rất nhanh nhờ đặc trưng có sẵn.
     """
-    models = ["resnet50", "clip", "dinov2"]
-    colors = {"resnet50": "blue", "clip": "green", "dinov2": "red"}
-    labels = {"resnet50": "ResNet50 (Supervised)", "clip": "CLIP (Zero-shot/Linear)", "dinov2": "DINOv2 (Linear Probe)"}
+    models = ["vit", "dinov2"]
+    colors = {"vit": "blue", "dinov2": "red"}
+    labels = {"vit": "ViT (ImageNet Pretrained)", "dinov2": "DINOv2 (Linear Probe)"}
     
     plt.figure(figsize=(10, 6))
     
@@ -46,8 +46,8 @@ def plot_bar_metrics():
     Hàm vẽ biểu đồ cột (Bar chart) so sánh trực tiếp hiệu năng cuối cùng trên tập Test
     dựa trên 2 tiêu chí cốt lõi: Accuracy và F1-Score.
     """
-    models = ["resnet50", "clip", "dinov2"]
-    labels = ["ResNet50\n(Supervised)", "CLIP\n(Linear)", "DINOv2\n(Linear)"]
+    models = ["vit", "dinov2"]
+    labels = ["ViT\n(ImageNet)", "DINOv2\n(Linear)"]
     
     accs = []
     f1s = []
@@ -110,7 +110,7 @@ def plot_confusion_matrix():
     from data_loader import DX_CLASSES
     from sklearn.metrics import ConfusionMatrixDisplay
     
-    models = ["resnet50", "clip", "dinov2"]
+    models = ["vit", "dinov2"]
     
     for m in models:
         hist = load_history(m)

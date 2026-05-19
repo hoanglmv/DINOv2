@@ -10,7 +10,7 @@
 set -euo pipefail
 
 DATA_ROOT="${1:-data/oxford_pet}"
-BASE_URL="https://www.robots.ox.ac.uk/~vgg/data/pets"
+BASE_URL="https://thor.robots.ox.ac.uk/pets"
 
 mkdir -p "$DATA_ROOT"
 cd "$DATA_ROOT"
