@@ -92,18 +92,27 @@ def main(args):
     
     # 2. Khởi tạo Mô hình
     if args.model == "dinov2":
-        model = Dinov2LinearProbe(num_classes=num_classes).to(device)
+        model = Dinov2LinearProbe(num_classes=num_classes, freeze_backbone=not args.finetune).to(device)
     elif args.model == "resnet50":
         model = ResNet50Baseline(num_classes=num_classes).to(device)
     elif args.model == "clip":
-        model = ClipLinearProbe(num_classes=num_classes).to(device)
+        model = ClipLinearProbe(num_classes=num_classes, freeze_backbone=not args.finetune).to(device)
     else:
         raise ValueError(f"Không nhận diện được mô hình: {args.model}")
         
     # 3. Thiết lập thông số Huấn luyện
     criterion = nn.CrossEntropyLoss()
-    # model.parameters() với DINOv2 và CLIP thì chỉ có trọng số của head là có requires_grad=True
-    optimizer = optim.Adam(model.parameters(), lr=args.lr)
+    
+    # Thiết lập Learning Rate khác biệt nếu Fine-tune (Backbone LR nhỏ hơn Head LR)
+    if args.finetune and args.model in ["dinov2", "clip"]:
+        optimizer = optim.Adam([
+            {"params": model.backbone.parameters(), "lr": args.lr * 0.1},
+            {"params": model.head.parameters(), "lr": args.lr}
+        ], weight_decay=1e-4)
+    else:
+        optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=1e-4)
+        
+    scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=args.epochs)
     
     # Biến theo dõi kết quả để sau này vẽ đồ thị
     history = {
@@ -123,6 +132,8 @@ def main(args):
         print(f"\nEpoch {epoch+1}/{args.epochs}")
         train_loss, train_acc = train_epoch(model, train_loader, criterion, optimizer, device)
         val_loss, val_acc, _, _ = evaluate(model, val_loader, criterion, device)
+        
+        scheduler.step()
         
         # Lưu kết quả
         history["train_loss"].append(train_loss)
@@ -161,5 +172,6 @@ if __name__ == "__main__":
     parser.add_argument("--batch_size", type=int, default=32, help="Kích thước batch")
     parser.add_argument("--epochs", type=int, default=10, help="Số epochs")
     parser.add_argument("--lr", type=float, default=1e-3, help="Learning rate")
+    parser.add_argument("--finetune", action="store_true", help="Bật Fine-tuning toàn bộ mô hình (unfreeze backbone)")
     args = parser.parse_args()
     main(args)

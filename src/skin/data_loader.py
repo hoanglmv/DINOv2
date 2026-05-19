@@ -69,11 +69,13 @@ def get_transforms(model_type="dinov2", is_train=True):
         target_size = 224
         
         if is_train:
-            # Data augmentation cho tập Train để tránh overfitting
+            # Data augmentation mạnh hơn cho tập Train để tránh overfitting
             return transforms.Compose([
-                transforms.RandomResizedCrop(target_size, scale=(0.8, 1.0)),
+                transforms.RandomResizedCrop(target_size, scale=(0.7, 1.0)),
                 transforms.RandomHorizontalFlip(),
                 transforms.RandomVerticalFlip(),
+                transforms.RandomRotation(90),
+                transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=mean, std=std)
             ])
