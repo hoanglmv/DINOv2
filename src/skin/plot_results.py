@@ -99,7 +99,36 @@ def plot_bar_metrics():
     plt.savefig("report/figures/performance_bar.png", dpi=300)
     print("Saved performance_bar.png")
 
+def plot_confusion_matrix():
+    """
+    Hàm vẽ Confusion Matrix cho từng mô hình đã chạy.
+    """
+    import sys
+    import os
+    # Đảm bảo có thể import data_loader
+    sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+    from data_loader import DX_CLASSES
+    from sklearn.metrics import ConfusionMatrixDisplay
+    
+    models = ["resnet50", "clip", "dinov2"]
+    
+    for m in models:
+        hist = load_history(m)
+        if hist and "test_cm" in hist:
+            cm = np.array(hist["test_cm"])
+            fig, ax = plt.subplots(figsize=(8, 6))
+            disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=DX_CLASSES)
+            disp.plot(cmap="Blues", ax=ax, values_format="d")
+            plt.title(f"Confusion Matrix - {m.upper()}", fontsize=14)
+            plt.tight_layout()
+            
+            save_path = f"report/figures/confusion_matrix_{m}.png"
+            plt.savefig(save_path, dpi=300)
+            print(f"Saved {save_path}")
+            plt.close()
+
 if __name__ == "__main__":
     os.makedirs("report/figures", exist_ok=True)
     plot_convergence()
     plot_bar_metrics()
+    plot_confusion_matrix()

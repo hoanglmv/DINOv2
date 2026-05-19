@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from tqdm import tqdm
-from sklearn.metrics import accuracy_score, f1_score
+from sklearn.metrics import accuracy_score, f1_score, confusion_matrix
 
 from data_loader import get_dataloaders
 from models import Dinov2LinearProbe, ResNet50Baseline, ClipLinearProbe
@@ -72,7 +72,8 @@ def evaluate(model, dataloader, criterion, device):
     epoch_acc = accuracy_score(all_labels, all_preds)
     # Dùng macro/weighted f1-score vì tập dữ liệu y tế này mất cân bằng (imbalanced)
     epoch_f1 = f1_score(all_labels, all_preds, average='weighted')
-    return epoch_loss, epoch_acc, epoch_f1
+    cm = confusion_matrix(all_labels, all_preds)
+    return epoch_loss, epoch_acc, epoch_f1, cm
 
 def main(args):
     # Cấu hình thiết bị (GPU nếu có, ngược lại dùng CPU)
@@ -121,7 +122,7 @@ def main(args):
     for epoch in range(args.epochs):
         print(f"\nEpoch {epoch+1}/{args.epochs}")
         train_loss, train_acc = train_epoch(model, train_loader, criterion, optimizer, device)
-        val_loss, val_acc, _ = evaluate(model, val_loader, criterion, device)
+        val_loss, val_acc, _, _ = evaluate(model, val_loader, criterion, device)
         
         # Lưu kết quả
         history["train_loss"].append(train_loss)
@@ -140,13 +141,14 @@ def main(args):
     # 5. Đánh giá cuối cùng trên tập Test
     print("\nTải lại trọng số tốt nhất để chạy đánh giá trên tập Test...")
     model.load_state_dict(torch.load(f"weights/{args.model}_best.pth"))
-    test_loss, test_acc, test_f1 = evaluate(model, test_loader, criterion, device)
+    test_loss, test_acc, test_f1, test_cm = evaluate(model, test_loader, criterion, device)
     
     print(f"Accuracy trên tập Test: {test_acc:.4f}")
     print(f"F1-Score trên tập Test: {test_f1:.4f}")
     
     history["test_acc"] = test_acc
     history["test_f1"] = test_f1
+    history["test_cm"] = test_cm.tolist()
     
     # Xuất lịch sử ra file JSON
     with open(f"logs/{args.model}_history.json", "w") as f:
