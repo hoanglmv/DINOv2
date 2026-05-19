@@ -94,12 +94,12 @@ DINOv2 & DINOv2 & Curated data + improved SSL recipe + distillation & Hướng t
 Bảng trên cho thấy DINOv2 là điểm hội tụ của nhiều hướng nghiên cứu trước đó. Khác biệt chính của DINOv2 là giải quyết đồng thời hai vấn đề: chất lượng dữ liệu pretraining và khả năng scale thuật toán SSL để tạo ra đặc trưng dùng trực tiếp.
 
 \section{Phương pháp}
-\subsection{Tổng quan phương pháp}
+\subsection*{Tổng quan phương pháp}
 DINOv2 không chỉ thay đổi một thành phần đơn lẻ, mà xây dựng một pipeline hoàn chỉnh để học đặc trưng thị giác tổng quát: dữ liệu được tuyển chọn tự động, objective self-supervised kết hợp giữa mức ảnh và mức patch, các kỹ thuật tối ưu hóa giúp huấn luyện mô hình rất lớn, sau đó distill mô hình lớn thành nhiều backbone nhỏ hơn. Điểm quan trọng là toàn bộ quá trình pretraining không dùng nhãn lớp hay caption văn bản; mô hình học trực tiếp từ ảnh và được đánh giá chủ yếu trong trạng thái frozen features.
 
 Có thể tóm tắt phương pháp của DINOv2 thành năm bước chính. Thứ nhất, nghiên cứu xây dựng tập dữ liệu pretraining LVD-142M từ dữ liệu curated và uncurated thông qua embedding, deduplication và retrieval. Thứ hai, mô hình sử dụng kiến trúc Vision Transformer với cơ chế student–teacher để học biểu diễn ổn định từ nhiều crop khác nhau của cùng một ảnh. Thứ ba, objective học tự giám sát kết hợp DINO loss ở mức ảnh và iBOT loss ở mức patch, giúp đặc trưng học được phù hợp cho cả image-level tasks và dense prediction. Thứ tư, nghiên cứu sử dụng nhiều kỹ thuật tối ưu hóa như Sinkhorn-Knopp centering, KoLeo regularizer, high-resolution adaptation, FlashAttention, sequence packing và FSDP để scale huấn luyện lên mô hình rất lớn. Cuối cùng, mô hình lớn ViT-g/14 được distill sang các backbone nhỏ hơn như ViT-S/14, ViT-B/14 và ViT-L/14 nhằm tạo ra nhiều lựa chọn sử dụng trong thực tế.
 
-\subsection{Bước 1: Xây dựng dữ liệu pretraining LVD-142M}
+\subsubsection*{Bước 1: Xây dựng dữ liệu pretraining LVD-142M}
 Thay vì lấy ngẫu nhiên ảnh web thô, nghiên cứu này xây dựng một tập dữ liệu curated quy mô lớn gọi là LVD-142M. Quy trình này bắt đầu từ hai nguồn: một tập curated làm “mỏ neo chất lượng” và một pool uncurated rất lớn lấy từ web. Tập curated gồm các nguồn như ImageNet-22k, ImageNet-1k train split, Google Landmarks và nhiều tập fine-grained; pool uncurated được lọc cơ bản để loại URL không an toàn, nội dung không phù hợp, ảnh trùng lặp theo PCA hash và làm mờ khuôn mặt nhận dạng được.
 \begin{itemize}
     \item \textbf{Embedding:} mỗi ảnh được ánh xạ thành vector đặc trưng bằng một self-supervised ViT-H/16 pretrained trên ImageNet-22k. Vector này là cơ sở để đo độ gần nhau giữa các ảnh.
@@ -110,12 +110,12 @@ Thay vì lấy ngẫu nhiên ảnh web thô, nghiên cứu này xây dựng mộ
 
 Ý nghĩa của bước này là kiểm soát chất lượng và độ đa dạng của dữ liệu. Bài báo cho thấy dữ liệu curated không chỉ giúp tăng hiệu năng trên những benchmark quen thuộc mà còn cải thiện khả năng tổng quát sang các miền không nằm trực tiếp trong quá trình curation.
 
-\subsection{Bước 2: Kiến trúc mô hình và cơ chế student-teacher}
+\subsubsection*{Bước 2: Kiến trúc mô hình và cơ chế student-teacher}
 DINOv2 sử dụng họ kiến trúc Vision Transformer (ViT), gồm nhiều kích thước như ViT-S/14, ViT-B/14, ViT-L/14 và ViT-g/14. Trong pretraining, mô hình vận hành theo cơ chế student-teacher. Student nhận các phiên bản augment/crop khác nhau của cùng một ảnh và được tối ưu bằng gradient descent; teacher không được cập nhật trực tiếp bằng gradient mà là exponential moving average (EMA) của student. Cách này giúp teacher tạo target ổn định hơn, giảm nhiễu trong quá trình học tự giám sát.
 
 Đặc trưng của ViT gồm class token biểu diễn toàn ảnh và patch tokens biểu diễn từng vùng ảnh. Vì vậy DINOv2 tối ưu đồng thời hai loại thông tin: image-level representation và patch-level representation. Đây là lý do đặc trưng của DINOv2 dùng tốt cho cả classification/retrieval lẫn segmentation/depth estimation.
 
-\subsection{Bước 3: Objective học tự giám sát}
+\subsubsection*{Bước 3: Objective học tự giám sát}
 Objective của DINOv2 có thể xem là sự kết hợp giữa DINO và iBOT, kèm một số sửa đổi để ổn định khi scale lớn.
 
 \subsubsection{Image-level objective theo DINO}
@@ -140,7 +140,7 @@ KoLeo regularizer khuyến khích các vector đặc trưng phân bố đều h�
     \label{tab:1.2}
 \end{figure}
 
-\subsection{Bước 4: Recipe huấn luyện khi scale lớn}
+\subsubsection*{Bước 4: Recipe huấn luyện khi scale lớn}
 Ngoài objective chính, DINOv2 thêm nhiều thay đổi nhỏ nhưng quan trọng để scale ổn định. Bảng 1.3 cho thấy các thành phần được thêm dần từ iBOT đến DINOv2. Không phải mọi thay đổi đều tăng đồng thời cả k-NN và linear accuracy, nhưng tổng thể chúng giúp quá trình huấn luyện ổn định hơn và tăng chất lượng frozen features.
 
 \begin{figure}[h]
@@ -150,7 +150,7 @@ Ngoài objective chính, DINOv2 thêm nhiều thay đổi nhỏ nhưng quan tr�
     \label{tab:1.3}
 \end{figure}
 
-\subsection{Bước 5: High-resolution adaptation}
+\subsubsection*{Bước 5: High-resolution adaptation}
 Các tác vụ mức pixel như segmentation hoặc depth estimation cần giữ lại chi tiết nhỏ trong ảnh. Tuy nhiên, huấn luyện toàn bộ quá trình ở độ phân giải cao rất tốn chi phí. DINOv2 giải quyết bằng cách train phần lớn thời gian ở độ phân giải thấp hơn, sau đó tăng độ phân giải lên 518×518 trong một giai đoạn ngắn cuối pretraining. Cách này gần đạt chất lượng của huấn luyện high-resolution toàn thời gian nhưng tiết kiệm compute hơn nhiều.
 
 \begin{figure}[h]
@@ -160,7 +160,7 @@ Các tác vụ mức pixel như segmentation hoặc depth estimation cần giữ
     \label{fig:1.5}
 \end{figure}
 
-\subsection{Bước 6: Tối ưu triển khai để huấn luyện mô hình lớn}
+\subsubsection*{Bước 6: Tối ưu triển khai để huấn luyện mô hình lớn}
 Đóng góp kỹ thuật lớn của DINOv2 nằm ở việc làm cho self-supervised ViT lớn có thể huấn luyện được với chi phí hợp lý. Bài báo nêu rằng với cùng phần cứng, code DINOv2 chạy nhanh khoảng 2 lần và dùng khoảng 1/3 bộ nhớ so với implementation iBOT. Các kỹ thuật chính gồm:
 \begin{itemize}
     \item \textbf{Fast and memory-efficient attention:} triển khai biến thể FlashAttention để giảm bộ nhớ và tăng tốc self-attention, đặc biệt hữu ích với chuỗi token dài.
@@ -169,7 +169,7 @@ Các tác vụ mức pixel như segmentation hoặc depth estimation cần giữ
     \item \textbf{Fully-Sharded Data Parallel (FSDP):} shard student, teacher và trạng thái optimizer qua nhiều GPU. Điều này giúp train ViT-g hơn 1 tỷ tham số mà không bị giới hạn bởi bộ nhớ một GPU đơn lẻ, đồng thời giảm chi phí truyền thông giữa GPU.
 \end{itemize}
 
-\subsection{Bước 7: Distillation từ ViT-g sang các model nhỏ}
+\subsubsection*{Bước 7: Distillation từ ViT-g sang các model nhỏ}
 Sau khi huấn luyện mô hình lớn ViT-g/14, DINOv2 không train mọi mô hình nhỏ từ đầu. Thay vào đó, họ distill đặc trưng từ ViT-g sang ViT-S/B/L. Trong distillation, ViT-g đóng vai trò teacher cố định; student nhỏ học để tái tạo output của teacher. Một EMA của student được giữ làm model cuối. Quá trình này giúp các model nhỏ kế thừa chất lượng đặc trưng của mô hình lớn, thường tốt hơn so với train cùng kiến trúc từ scratch.
 
 \begin{figure}[h]
@@ -179,7 +179,7 @@ Sau khi huấn luyện mô hình lớn ViT-g/14, DINOv2 không train mọi mô h
     \label{fig:1.6}
 \end{figure}
 
-\subsection{Bước 8: Giao thức đánh giá}
+\subsubsection*{Bước 8: Giao thức đánh giá}
 Để chứng minh đặc trưng thật sự tổng quát, DINOv2 chủ yếu đánh giá trong thiết lập frozen backbone. Tức là backbone pretrained được giữ nguyên, chỉ train một linear classifier hoặc một head đơn giản phía trên. Các benchmark bao phủ nhiều cấp độ: classification trên ImageNet và các tập fine-grained, robustness/domain shift, video understanding, retrieval, semantic segmentation và monocular depth estimation. Cách đánh giá này phù hợp với mục tiêu của bài báo: tạo feature extractor dùng trực tiếp, không cần fine-tuning backbone.
 
 \section{Kết quả}

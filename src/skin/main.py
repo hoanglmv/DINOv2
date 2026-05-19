@@ -101,7 +101,7 @@ def main(args):
     # 3. Thiết lập thông số Huấn luyện
     criterion = nn.CrossEntropyLoss()
     # model.parameters() với DINOv2 và CLIP thì chỉ có trọng số của head là có requires_grad=True
-    optimizer = optim.Adam(model.parameters(), lr=args.lr)
+    optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     
     # Biến theo dõi kết quả để sau này vẽ đồ thị
     history = {
@@ -165,7 +165,8 @@ if __name__ == "__main__":
     parser.add_argument("--model", type=str, choices=["dinov2", "vit"], required=True, help="Tên mô hình")
     parser.add_argument("--batch_size", type=int, default=32, help="Kích thước batch")
     parser.add_argument("--epochs", type=int, default=20, help="Số epochs")
-    parser.add_argument("--lr", type=float, default=1e-3, help="Learning rate")
+    parser.add_argument("--lr", type=float, default=5e-4, help="Learning rate")
+    parser.add_argument("--weight_decay", type=float, default=1e-4, help="Weight decay (L2 penalty)")
     parser.add_argument("--patience", type=int, default=5, help="Số epochs chờ trước khi Early Stopping")
     args = parser.parse_args()
     main(args)

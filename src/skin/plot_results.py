@@ -57,8 +57,8 @@ def plot_bar_metrics():
     for m, l in zip(models, labels):
         hist = load_history(m)
         if hist:
-            accs.append(hist["test_acc"])
-            f1s.append(hist["test_f1"])
+            accs.append(hist["test_acc"] * 100)
+            f1s.append(hist["test_f1"] * 100)
             valid_labels.append(l)
             
     if not accs:
@@ -79,13 +79,13 @@ def plot_bar_metrics():
     ax.set_xticks(x)
     ax.set_xticklabels(valid_labels, fontsize=11)
     ax.legend(loc='lower right')
-    ax.set_ylim([0, 1.1]) # Chặn trục Y từ 0 đến 1.1 để đồ thị thoáng
+    ax.set_ylim([0, 110]) # Chặn trục Y từ 0 đến 110 để đồ thị thoáng
     
     # Hàm con tự động hiển thị số (giá trị) trên đỉnh từng cột
     def autolabel(rects):
         for rect in rects:
             height = rect.get_height()
-            ax.annotate(f'{height:.3f}',
+            ax.annotate(f'{height:.2f}%',
                         xy=(rect.get_x() + rect.get_width() / 2, height),
                         xytext=(0, 3),  # Đẩy lên 3 points
                         textcoords="offset points",

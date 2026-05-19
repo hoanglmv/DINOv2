@@ -62,7 +62,7 @@ Bảng \ref{tab:results} trình bày kết quả chi tiết thu được sau qu�
     \hline
     \textbf{Mô hình} & \textbf{Phương pháp} & \textbf{Test Accuracy (\%)} & \textbf{Test F1-Score (\%)} \\
     \hline
-    \textbf{DINOv2} & Linear Probing & \textbf{81.28} & \textbf{80.58} \\
+    \textbf{DINOv2} & Linear Probing & \textbf{80.03} & \textbf{79.47} \\
     ViT-B/16 & ImageNet Pretrained & 82.63 & 81.65 \\
     \hline
     \end{tabular}
@@ -70,7 +70,7 @@ Bảng \ref{tab:results} trình bày kết quả chi tiết thu được sau qu�
     \label{tab:results}
 \end{table}
 
-Về mặt hiệu năng tổng thể (Hình \ref{fig:performance} và Bảng \ref{tab:results}), mô hình tham chiếu ViT-B/16 đạt kết quả Test Accuracy 82.63\% và F1-Score 81.65\%. Trong khi đó, DINOv2 đạt 81.28\% Accuracy và 80.58\% F1-Score. Dù thấp hơn Baseline khoảng 1.35\%, kết quả này của DINOv2 là \textbf{đặc biệt ấn tượng} khi xem xét bản chất phương pháp huấn luyện. ViT-B/16 đã được tinh chỉnh qua hàng triệu nhãn dữ liệu của con người, mang sẵn định kiến (bias) mạnh mẽ về việc phân loại hình ảnh. Ngược lại, DINOv2 hoàn toàn "mù" về nhãn lớp trong lúc pretrain, nó tự mò mẫm cấu trúc tương đồng giữa các vùng ảnh. Việc DINOv2 có thể bám đuổi sát sao ViT-B/16 trong một domain hẹp như y tế khẳng định tiềm năng khổng lồ của Self-Supervised Learning trong vai trò một Feature Extractor tổng quát.
+Về mặt hiệu năng tổng thể (Hình \ref{fig:performance} và Bảng \ref{tab:results}), mô hình tham chiếu ViT-B/16 đạt kết quả Test Accuracy 82.63\% và F1-Score 81.65\%. Trong khi đó, DINOv2 đạt 80.03\% Accuracy và 79.47\% F1-Score. Dù thấp hơn Baseline khoảng 1.35\%, kết quả này của DINOv2 là \textbf{đặc biệt ấn tượng} khi xem xét bản chất phương pháp huấn luyện. ViT-B/16 đã được tinh chỉnh qua hàng triệu nhãn dữ liệu của con người, mang sẵn định kiến (bias) mạnh mẽ về việc phân loại hình ảnh. Ngược lại, DINOv2 hoàn toàn "mù" về nhãn lớp trong lúc pretrain, nó tự mò mẫm cấu trúc tương đồng giữa các vùng ảnh. Việc DINOv2 có thể bám đuổi sát sao ViT-B/16 trong một domain hẹp như y tế khẳng định tiềm năng khổng lồ của Self-Supervised Learning trong vai trò một Feature Extractor tổng quát.
 
 \subsection{Phân tích Ma trận Nhầm lẫn}
 
