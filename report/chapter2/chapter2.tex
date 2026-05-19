@@ -2,39 +2,50 @@
 
 \section{Bài toán Phân loại ảnh}
 
-\subsection{Mô tả tập dữ liệu SkinCancerMNIST}
-Để kiểm chứng khả năng trích xuất đặc trưng của DINOv2 trong một miền dữ liệu hẹp, nhóm quyết định sử dụng bộ dữ liệu y tế \textbf{SkinCancerMNIST (HAM10000)}. Đây là một tập dữ liệu ảnh da liễu với độ khó cao do các bệnh lý về da thường có màu sắc và kết cấu bề mặt rất giống nhau.
+\subsection{Mô tả chi tiết tập dữ liệu SkinCancerMNIST (HAM10000)}
+Để kiểm chứng khả năng trích xuất đặc trưng của DINOv2 trong một miền dữ liệu hẹp và mang tính chuyên môn cao, nhóm nghiên cứu quyết định sử dụng bộ dữ liệu y tế \textbf{SkinCancerMNIST (HAM10000)}. Đây là một tập dữ liệu ảnh da liễu nổi tiếng với độ khó cao do các bệnh lý về da thường có màu sắc và kết cấu bề mặt rất giống nhau, đồng thời hình thái tổn thương của cùng một loại bệnh lại có thể thay đổi đa dạng.
+
+Bộ dữ liệu bao gồm tổng cộng 10,015 hình ảnh nội soi da liễu, được thu thập từ nhiều nhóm đối tượng khác nhau nhằm đảm bảo tính đại diện. Các tổn thương da được chia thành 7 lớp bệnh lý chính, bao gồm:
 \begin{itemize}
-    \item \textbf{Số lượng:} 10,015 hình ảnh đa dạng về tổn thương da.
-    \item \textbf{Phân loại:} 7 lớp bệnh lý (Ví dụ: Melanoma, Basal cell carcinoma, v.v.).
-    \item \textbf{Thách thức:} Tập dữ liệu bị mất cân bằng nghiêm trọng (imbalanced), đòi hỏi mô hình phải có khả năng hiểu các đặc trưng tinh vi thay vì chỉ học vẹt theo tần suất xuất hiện.
+    \item \textbf{Melanoma (MEL):} Khối u ác tính tế bào sắc tố, một trong những dạng ung thư da nguy hiểm nhất.
+    \item \textbf{Melanocytic nevus (NV):} Nốt ruồi sắc tố lành tính, chiếm số lượng áp đảo trong tập dữ liệu.
+    \item \textbf{Basal cell carcinoma (BCC):} Ung thư biểu mô tế bào đáy.
+    \item \textbf{Actinic keratosis (AKIEC):} Dày sừng quang hóa, tổn thương tiền ung thư.
+    \item \textbf{Benign keratosis (BKL):} Dày sừng lành tính.
+    \item \textbf{Dermatofibroma (DF):} U xơ da lành tính.
+    \item \textbf{Vascular lesion (VASC):} Tổn thương mạch máu.
 \end{itemize}
 
+Thách thức lớn nhất khi làm việc với tập dữ liệu này là sự mất cân bằng dữ liệu nghiêm trọng (class imbalance). Lớp bệnh lý NV chiếm hơn 67\% tổng số ảnh, trong khi các lớp như DF hay VASC chỉ chiếm một tỷ lệ rất nhỏ (dưới 2\%). Sự mất cân bằng này đòi hỏi các mô hình phân loại không chỉ học vẹt theo tần suất xuất hiện của nhãn, mà phải có khả năng hiểu sâu các đặc trưng tinh vi về mặt kết cấu (texture) và cấu trúc không gian (spatial structure) của tổn thương để đưa ra quyết định chính xác. Chính vì vậy, HAM10000 là một bài test lý tưởng để đánh giá xem các đặc trưng "out-of-the-box" của DINOv2 có thực sự tổng quát và mạnh mẽ hay không.
+
 \subsection{Thiết lập thực nghiệm và Cấu hình so sánh (ViT và DINOv2)}
-Thực nghiệm được triển khai với cấu hình như sau:
+Để có một góc nhìn khách quan về sức mạnh của phương pháp học tự giám sát (Self-Supervised Learning - SSL), thực nghiệm được thiết kế theo phương pháp \textbf{Linear Probing}. Phương pháp này đóng băng (freeze) hoàn toàn mạng trích xuất đặc trưng (backbone) và chỉ huấn luyện một lớp phân loại tuyến tính (Linear Head) duy nhất ở cuối. Cách làm này đảm bảo rằng kết quả độ chính xác phản ánh trực tiếp chất lượng của các vector đặc trưng ban đầu mà mạng trích xuất được, thay vì sự tinh chỉnh của kiến trúc mạng trong quá trình huấn luyện.
+
+Thực nghiệm được triển khai với cấu hình so sánh song song như sau:
 \begin{itemize}
-    \item \textbf{Mô hình kiểm chứng (Baseline):} ViT-B/16 (Vision Transformer được huấn luyện có giám sát trước trên ImageNet).
-    \item \textbf{Mô hình DINOv2:} Sử dụng phiên bản \texttt{dinov2\_vitb14} với toàn bộ trọng số (backbone) được đóng băng (freeze). Chỉ có một lớp phân loại tuyến tính (Linear Head) duy nhất được cập nhật trọng số.
-    \item \textbf{Siêu tham số (Hyperparameters):}
-    \begin{itemize}
-        \item Batch size: 32
-        \item Số Epochs: 20 (có Early Stopping)
-        \item Tốc độ học (Learning Rate): $10^{-3}$ với Adam Optimizer
-        \item Loss Function: CrossEntropy Loss
-    \end{itemize}
+    \item \textbf{Mô hình kiểm chứng (Baseline) - ViT-B/16:} Đây là kiến trúc Vision Transformer tiêu chuẩn được huấn luyện có giám sát (Supervised Learning) trên bộ dữ liệu khổng lồ ImageNet. Mô hình này đại diện cho phương pháp huấn luyện truyền thống, nơi mạng học cách nhận diện các đặc trưng chủ yếu thông qua nhãn (label) của dữ liệu.
+    \item \textbf{Mô hình DINOv2 - dinov2\_vitb14:} Sử dụng kiến trúc ViT tương đồng, nhưng được huấn luyện hoàn toàn không giám sát trên tập dữ liệu LVD-142M theo phương pháp DINOv2. Mục tiêu là kiểm chứng xem liệu việc học các biểu diễn hình ảnh thuần túy, không có nhãn, có thể vượt qua hoặc ít nhất là cạnh tranh được với phương pháp có nhãn truyền thống khi áp dụng vào một miền dữ liệu y tế hoàn toàn mới.
+\end{itemize}
+
+\textbf{Siêu tham số (Hyperparameters) huấn luyện:}
+\begin{itemize}
+    \item \textbf{Kích thước batch (Batch size):} 32, đảm bảo tính toán ổn định gradient trong quá trình lan truyền ngược.
+    \item \textbf{Số lượng Epochs tối đa:} 20 epochs. Tuy nhiên, cơ chế \textbf{Early Stopping} (với patience=5) được áp dụng để tự động dừng quá trình huấn luyện nếu Loss trên tập Validation không có dấu hiệu giảm, giúp ngăn chặn hiện tượng quá khớp (Overfitting).
+    \item \textbf{Thuật toán tối ưu (Optimizer):} Adam Optimizer với tốc độ học (Learning Rate) khởi tạo là $10^{-3}$, một mức khá chuẩn cho bài toán Linear Probing.
+    \item \textbf{Hàm mất mát (Loss Function):} CrossEntropy Loss, phù hợp cho bài toán phân loại đa lớp.
 \end{itemize}
 
 \subsection{Kết quả và Đánh giá}
-Sau quá trình huấn luyện (tối đa 20 epochs), các mô hình hội tụ và cho ra kết quả được thể hiện qua các đồ thị dưới đây.
+Sau quá trình huấn luyện thực tế, cả hai mô hình đều có dấu hiệu hội tụ và cung cấp những hiểu biết quan trọng về chất lượng của các vector đặc trưng. Đồ thị hội tụ và bảng số liệu dưới đây minh họa chi tiết quá trình này.
 
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.8\textwidth]{figures/convergence.png}
-    \caption{Tốc độ hội tụ (Validation Loss) của các mô hình}
+    \caption{Tốc độ hội tụ (Validation Loss) của các mô hình trong quá trình huấn luyện}
     \label{fig:convergence}
 \end{figure}
 
-Như quan sát trên Hình \ref{fig:convergence}, mô hình DINOv2 (đường màu đỏ) cho thấy tốc độ hội tụ cực kỳ ổn định và nhanh chóng. Điều này chứng tỏ bộ đặc trưng ban đầu mà DINOv2 cung cấp nhờ phương pháp tự giám sát đã chứa sẵn hàm lượng thông tin tổng quát cực kỳ cao. Ngược lại, mô hình ViT thuần túy (pretrained trên ImageNet bằng Supervised Learning) tuy có cùng kiến trúc mạng nhưng lại gặp khó khăn và hội tụ chậm hơn, do các đặc trưng được học có giám sát trên ImageNet chưa thực sự tối ưu khi chuyển đổi sang ảnh y tế.
+Như quan sát trên Hình \ref{fig:convergence}, mô hình DINOv2 (đường màu đỏ) cho thấy tốc độ hội tụ cực kỳ ổn định và nhanh chóng trong những epoch đầu tiên. Điều này chứng tỏ bộ đặc trưng ban đầu mà DINOv2 cung cấp nhờ phương pháp tự giám sát đã chứa sẵn hàm lượng thông tin tổng quát rất cao, cho phép lớp Linear Head phân tách không gian đa chiều một cách dễ dàng. Mô hình ViT tham chiếu (đường màu xanh) cũng cho thấy sự hội tụ tốt nhưng có phần kém ổn định hơn ở các giai đoạn đầu, cho thấy các đặc trưng ImageNet đôi khi gặp phải rào cản domain-shift khi chuyển sang ảnh y tế hẹp.
 
 \begin{figure}[h]
     \centering
@@ -59,4 +70,26 @@ Bảng \ref{tab:results} trình bày kết quả chi tiết thu được sau qu�
     \label{tab:results}
 \end{table}
 
-Về mặt hiệu năng tổng thể (Hình \ref{fig:performance} và Bảng \ref{tab:results}), mô hình tham chiếu ViT-B/16 đạt kết quả Test Accuracy 82.63\% sau 20 epochs. Do có cùng kiến trúc mạng Transformer, việc so sánh trực tiếp DINOv2 và ViT-B/16 cho thấy rõ ràng sức mạnh của phương pháp học tự giám sát (SSL). Mặc dù ViT được huấn luyện có giám sát rất kỹ trên hàng triệu bức ảnh ImageNet, nhưng khả năng tổng quát hóa các đặc trưng hình ảnh của nó đối với một miền dữ liệu hoàn toàn mới như ảnh y khoa (Skin Cancer) vẫn còn hạn chế so với các đặc trưng "vạn năng" mà DINOv2 tự học được. Thực tế, kết quả kiểm thử cho thấy DINOv2 đạt độ chính xác 81.28\%, chứng tỏ đặc trưng tự học của nó phù hợp và mạnh mẽ hơn nhiều so với việc dùng ViT-B/16.
+Về mặt hiệu năng tổng thể (Hình \ref{fig:performance} và Bảng \ref{tab:results}), mô hình tham chiếu ViT-B/16 đạt kết quả Test Accuracy 82.63\% và F1-Score 81.65\%. Trong khi đó, DINOv2 đạt 81.28\% Accuracy và 80.58\% F1-Score. Dù thấp hơn Baseline khoảng 1.35\%, kết quả này của DINOv2 là \textbf{đặc biệt ấn tượng} khi xem xét bản chất phương pháp huấn luyện. ViT-B/16 đã được tinh chỉnh qua hàng triệu nhãn dữ liệu của con người, mang sẵn định kiến (bias) mạnh mẽ về việc phân loại hình ảnh. Ngược lại, DINOv2 hoàn toàn "mù" về nhãn lớp trong lúc pretrain, nó tự mò mẫm cấu trúc tương đồng giữa các vùng ảnh. Việc DINOv2 có thể bám đuổi sát sao ViT-B/16 trong một domain hẹp như y tế khẳng định tiềm năng khổng lồ của Self-Supervised Learning trong vai trò một Feature Extractor tổng quát.
+
+\subsection{Phân tích Ma trận Nhầm lẫn}
+
+Để hiểu sâu hơn về hành vi phân loại, ma trận nhầm lẫn (Confusion Matrix) của hai mô hình được trích xuất (Hình \ref{fig:cm_dinov2} và Hình \ref{fig:cm_vit}). 
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.85\textwidth]{figures/confusion_matrix_dinov2.png}
+    \caption{Ma trận nhầm lẫn (Confusion Matrix) của mô hình DINOv2 trên tập Test}
+    \label{fig:cm_dinov2}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.85\textwidth]{figures/confusion_matrix_vit.png}
+    \caption{Ma trận nhầm lẫn (Confusion Matrix) của mô hình ViT-B/16 trên tập Test}
+    \label{fig:cm_vit}
+\end{figure}
+
+Sự mất cân bằng dữ liệu của HAM10000 thể hiện rõ qua các ma trận này: cả hai mô hình đều có khả năng nhận diện xuất sắc lớp NV (Melanocytic nevus) vì đây là lớp chiếm đa số (Majority class). Tuy nhiên, với các lớp có số lượng mẫu ít hơn như DF hay VASC, cả hai mô hình đều bộc lộ điểm yếu và có xu hướng dự đoán nhầm sang lớp NV. Điểm khác biệt nằm ở chỗ, các vùng đặc trưng học từ mức patch (patch-level features) của DINOv2 giúp nó nhận diện một số cấu trúc bề mặt đặc thù khá tốt, nhưng đôi lúc vẫn bị nhiễu bởi các bóng sáng hoặc cấu trúc nang lông trên ảnh nội soi. Trong khi đó, ViT-B/16 có xu hướng bảo thủ hơn nhờ việc học các ranh giới lớp (decision boundary) đã được định hình cứng từ ImageNet. 
+
+Tóm lại, thực nghiệm trên SkinCancerMNIST khẳng định sức mạnh "out-of-the-box" của DINOv2. Bằng cách kết hợp DINOv2 với các phương pháp xử lý dữ liệu mất cân bằng (như Focal Loss hoặc Weighted Sampling), hoàn toàn có khả năng nâng cao hiệu suất phân loại y tế mà không cần thiết phải tốn kém nguồn lực gán nhãn hàng vạn ảnh từ đầu.
