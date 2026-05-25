@@ -11,6 +11,7 @@ MODULES = [
     "zero_shot_seg.test.test_feature_extractor",
     "zero_shot_seg.test.test_segmenter",
     "zero_shot_seg.test.test_visualize",
+    "zero_shot_seg.test.test_metrics",
 ]
 
 if __name__ == "__main__":

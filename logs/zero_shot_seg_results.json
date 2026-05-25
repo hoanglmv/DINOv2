@@ -1,0 +1,84 @@
+{
+  "config": {
+    "num_refs": 10,
+    "num_eval": 150,
+    "split": "test",
+    "device": "cpu",
+    "backbones": [
+      "dinov2_vits14",
+      "dinov2_vitb14",
+      "vit_b_16_in1k"
+    ],
+    "methods": [
+      "prototype",
+      "cluster"
+    ],
+    "class_names": [
+      "pet",
+      "background",
+      "border"
+    ]
+  },
+  "results": {
+    "dinov2_vits14": {
+      "prototype": {
+        "mIoU": 0.6238594055175781,
+        "pixel_acc": 0.8177852630615234,
+        "per_class_iou": {
+          "pet": 0.6742975115776062,
+          "background": 0.8667468428611755,
+          "border": 0.330533891916275
+        }
+      },
+      "cluster": {
+        "mIoU": 0.4968659579753876,
+        "pixel_acc": 0.8018966317176819,
+        "per_class_iou": {
+          "pet": 0.6386951804161072,
+          "background": 0.8519026637077332,
+          "border": 0.0
+        }
+      }
+    },
+    "dinov2_vitb14": {
+      "prototype": {
+        "mIoU": 0.618992269039154,
+        "pixel_acc": 0.81699538230896,
+        "per_class_iou": {
+          "pet": 0.6732099652290344,
+          "background": 0.8661453127861023,
+          "border": 0.31762146949768066
+        }
+      },
+      "cluster": {
+        "mIoU": 0.5030552744865417,
+        "pixel_acc": 0.8084309697151184,
+        "per_class_iou": {
+          "pet": 0.6495878100395203,
+          "background": 0.8595779538154602,
+          "border": 0.0
+        }
+      }
+    },
+    "vit_b_16_in1k": {
+      "prototype": {
+        "mIoU": 0.5547041893005371,
+        "pixel_acc": 0.7546109557151794,
+        "per_class_iou": {
+          "pet": 0.5857895612716675,
+          "background": 0.7813044786453247,
+          "border": 0.29701852798461914
+        }
+      },
+      "cluster": {
+        "mIoU": 0.43236398696899414,
+        "pixel_acc": 0.7491710782051086,
+        "per_class_iou": {
+          "pet": 0.5779581069946289,
+          "background": 0.7191338539123535,
+          "border": 0.0
+        }
+      }
+    }
+  }
+}

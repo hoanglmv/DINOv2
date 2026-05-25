@@ -93,3 +93,110 @@ Về mặt hiệu năng tổng thể (Hình \ref{fig:performance} và Bảng \re
 Sự mất cân bằng dữ liệu của HAM10000 thể hiện rõ qua các ma trận này: cả hai mô hình đều có khả năng nhận diện xuất sắc lớp NV (Melanocytic nevus) vì đây là lớp chiếm đa số (Majority class). Tuy nhiên, với các lớp có số lượng mẫu ít hơn như DF hay VASC, cả hai mô hình đều bộc lộ điểm yếu và có xu hướng dự đoán nhầm sang lớp NV. Điểm khác biệt nằm ở chỗ, các vùng đặc trưng học từ mức patch (patch-level features) của DINOv2 giúp nó nhận diện một số cấu trúc bề mặt đặc thù khá tốt, nhưng đôi lúc vẫn bị nhiễu bởi các bóng sáng hoặc cấu trúc nang lông trên ảnh nội soi. Trong khi đó, ViT-B/16 có xu hướng bảo thủ hơn nhờ việc học các ranh giới lớp (decision boundary) đã được định hình cứng từ ImageNet. 
 
 Tóm lại, thực nghiệm trên SkinCancerMNIST khẳng định sức mạnh "out-of-the-box" của DINOv2. Bằng cách kết hợp DINOv2 với các phương pháp xử lý dữ liệu mất cân bằng (như Focal Loss hoặc Weighted Sampling), hoàn toàn có khả năng nâng cao hiệu suất phân loại y tế mà không cần thiết phải tốn kém nguồn lực gán nhãn hàng vạn ảnh từ đầu.
+
+\section{Bài toán Phân đoạn ảnh Zero-Shot}
+
+Phân đoạn ảnh (Semantic Segmentation) là bài toán \textit{dense prediction} điển hình, đòi hỏi mô hình không chỉ "nhìn" được toàn bộ ảnh mà còn phải giữ được thông tin không gian (spatial layout) ở từng vị trí pixel. Đây vốn là điểm yếu kinh điển của các phương pháp Self-Supervised Learning trước DINOv2 — vốn chỉ tối ưu trên CLS token (toàn ảnh) nên patch features bị "nén" về phục vụ classification. Nhóm chọn bài toán này để kiểm chứng tuyên bố quan trọng nhất của paper DINOv2: \textbf{patch features có thể dùng trực tiếp cho dense task mà không cần huấn luyện thêm}.
+
+\subsection{Mô tả tập dữ liệu Oxford-IIIT Pet (Trimap)}
+Tập dữ liệu \textbf{Oxford-IIIT Pet} bao gồm 7,349 ảnh thuộc 37 giống chó và mèo khác nhau, kèm theo annotation phân đoạn dạng \textit{trimap} với 3 lớp pixel:
+\begin{itemize}
+    \item \textbf{Foreground (pet):} pixel thuộc về con vật chính trong ảnh.
+    \item \textbf{Background:} pixel nền (cỏ, nhà, đồ vật xung quanh).
+    \item \textbf{Border:} vùng ranh giới mờ giữa con vật và nền, thường rộng vài pixel.
+\end{itemize}
+So với các benchmark "nặng" như Pascal VOC hay ADE20K, Oxford-IIIT Pet nhẹ hơn nhiều và rất phù hợp cho thực nghiệm \textit{training-free}: chỉ 3 lớp, kích thước ảnh đa dạng, đối tượng chính thường chiếm vị trí trung tâm. Trong thí nghiệm này, nhóm sử dụng split \texttt{test.txt} (chuẩn của Oxford), lấy 10 ảnh đầu làm \textit{reference} và 150 ảnh kế tiếp làm tập đánh giá.
+
+\subsection{Thiết lập thực nghiệm}
+Toàn bộ pipeline được cài đặt \textbf{training-free}: cả ba mô hình so sánh đều bị \textit{đóng băng hoàn toàn} (không có một gradient nào được tính), chỉ trích xuất \textit{patch tokens} từ block cuối cùng và dùng chúng theo hai cách:
+
+\begin{itemize}
+    \item \textbf{Phương pháp 1 — Prototype-based} (có vài reference, không có loss): với mỗi class, lấy mask ground-truth của 10 ảnh reference để chọn ra patch features thuộc về class đó, trung bình hóa và L2-normalize thành \textit{prototype vector}. Khi segment ảnh mới, tính cosine similarity giữa từng patch feature và 3 prototype, upsample về độ phân giải gốc bằng bilinear, rồi \texttt{argmax} → label map.
+    \item \textbf{Phương pháp 2 — Spherical KMeans clustering} (hoàn toàn không có nhãn): gom patch features từ 10 ảnh reference, chạy KMeans với $k=3$ trên đơn vị mặt cầu (centroid L2-normalize sau mỗi vòng). Sau khi cluster, gán cluster\_id $\rightarrow$ class\_id bằng \textit{greedy IoU matching} trên chính tập reference (không "nhìn" vào tập eval).
+\end{itemize}
+
+Ba feature extractor được so sánh theo cùng pipeline (chỉ thay backbone):
+\begin{itemize}
+    \item \textbf{DINOv2-S} (\texttt{dinov2\_vits14}, $\sim$21M tham số): mô hình SSL nhẹ nhất của DINOv2.
+    \item \textbf{DINOv2-B} (\texttt{dinov2\_vitb14}, $\sim$86M tham số): tương đương kích thước với baseline ViT-B/16.
+    \item \textbf{ViT-B/16 (IN-1K)} (huấn luyện có giám sát trên ImageNet-1K): baseline đối xứng với §2.1, đại diện cho phương pháp truyền thống.
+\end{itemize}
+
+\textbf{Cấu hình chung:} kích thước ảnh 224$\times$224 (bội số chung của patch 14 và 16), normalize theo ImageNet mean/std, đánh giá trên CPU. \textbf{Metrics:} mean IoU (mIoU) và pixel accuracy, kèm IoU phân tách theo từng class. Triển khai chi tiết: \texttt{src/zero\_shot\_seg/evaluate.py}.
+
+\subsection{Kết quả định lượng}
+Bảng \ref{tab:seg_results} và Hình \ref{fig:seg_miou} tổng hợp mIoU và pixel accuracy của 6 cấu hình. Hình \ref{fig:seg_per_class} mở rộng theo từng class cho phương pháp Prototype.
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|l|l|c|c|}
+    \hline
+    \textbf{Backbone} & \textbf{Phương pháp} & \textbf{mIoU (\%)} & \textbf{Pixel Acc (\%)} \\
+    \hline
+    \textbf{DINOv2-S}           & Prototype  & \textbf{62.39} & \textbf{81.78} \\
+    \textbf{DINOv2-B}           & Prototype  & 61.90 & 81.70 \\
+    ViT-B/16 (IN-1K)            & Prototype  & 55.47 & 75.46 \\
+    \hline
+    DINOv2-S                    & Clustering & 49.69 & 80.19 \\
+    \textbf{DINOv2-B}           & Clustering & \textbf{50.31} & 80.84 \\
+    ViT-B/16 (IN-1K)            & Clustering & 43.24 & 74.92 \\
+    \hline
+    \end{tabular}
+    \caption{Kết quả zero-shot segmentation trên 150 ảnh test của Oxford-IIIT Pet (10 ảnh reference).}
+    \label{tab:seg_results}
+\end{table}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.85\textwidth]{figures/seg_miou_compare.png}
+    \caption{So sánh mIoU giữa ba backbone và hai phương pháp training-free.}
+    \label{fig:seg_miou}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.85\textwidth]{figures/seg_per_class_iou.png}
+    \caption{IoU theo từng class (pet / background / border) cho phương pháp Prototype.}
+    \label{fig:seg_per_class}
+\end{figure}
+
+Có ba quan sát quan trọng từ các số liệu trên:
+
+\begin{itemize}
+    \item \textbf{DINOv2 vượt baseline ViT-B/16 cùng kích thước khoảng 6–7 điểm mIoU} ở cả hai phương pháp (DINOv2-B vs ViT-B/16-IN: $61.90\%$ vs $55.47\%$ ở Prototype, $50.31\%$ vs $43.24\%$ ở Clustering). Đây là khoảng cách rất đáng kể với một bài toán dense, đặc biệt khi xét rằng ViT-B/16 đã được tinh chỉnh trên 1.28M ảnh có nhãn ImageNet còn DINOv2 thì \textbf{chưa từng nhìn thấy một nhãn nào}. Khoảng cách này lớn nhất ở class \textit{background} ($86.6\%$ vs $78.1\%$ — chênh 8.5 điểm), khẳng định patch features của DINOv2 mã hóa cấu trúc không gian tốt hơn nhiều so với supervised ViT.
+    \item \textbf{DINOv2-S đủ tốt cho dense task nhẹ.} Bất ngờ là phiên bản 21M tham số (DINOv2-S) gần như ngang với phiên bản 86M (DINOv2-B) trên Prototype ($62.39\%$ vs $61.90\%$). Điều này cho thấy với một tập class nhỏ và yêu cầu không quá phức tạp, mô hình SSL nhỏ đã đủ để biểu diễn cấu trúc đối tượng — một tin tốt cho việc triển khai trên thiết bị có tài nguyên hạn chế.
+    \item \textbf{Class border là điểm yếu chung} (IoU $\sim$30\% cho Prototype, $0\%$ cho Clustering). Border vốn là vùng "mơ hồ" rộng 1-2 pixel quanh con vật; ở mức patch grid 16$\times$16, các pixel border bị "nuốt" vào patch hoặc pet hoặc background nên việc dự đoán đúng class này là rất khó. Đây không phải hạn chế của riêng DINOv2 mà là hệ quả của \textit{patch-level resolution} chung của ViT.
+\end{itemize}
+
+\subsection{Phân tích định tính}
+Hình \ref{fig:seg_qualitative} hiển thị 4 ảnh đại diện (2 mIoU cao nhất, 2 thấp nhất theo DINOv2-B Prototype) cùng dự đoán của ba cấu hình chính. Quy ước màu: \textcolor{red}{đỏ} = pet, \textcolor{blue}{xanh dương} = background, \textcolor{green}{xanh lá} = border.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{figures/seg_qualitative.png}
+    \caption{So sánh định tính: Original $\mid$ Ground truth $\mid$ DINOv2-B Prototype $\mid$ DINOv2-B Clustering $\mid$ ViT-B/16 Prototype.}
+    \label{fig:seg_qualitative}
+\end{figure}
+
+Quan sát các overlay trên các ảnh thành công (hàng 1-2, Abyssinian\_75 và Abyssinian\_77), có thể thấy:
+\begin{itemize}
+    \item \textbf{DINOv2-B Prototype} bám sát đường viền con vật, phân biệt được cả các chi tiết khó như chân và đuôi.
+    \item \textbf{DINOv2-B Clustering} dù không có một nhãn nào vẫn xuất hiện ranh giới rõ nét giữa con vật và nền — bằng chứng cho \textbf{object-centric emergence} mà paper DINOv2 nhấn mạnh.
+    \item \textbf{ViT-B/16 (IN-1K)} tạo ra mask "nhiễu" hơn, vùng đỏ lan tỏa sang nền hoặc bỏ sót các vùng nhỏ. Đây là biểu hiện của \textit{CLS-bias} trong supervised training: gradient từ classification head dồn về CLS token, làm patch tokens mất đi tính nhất quán không gian.
+\end{itemize}
+
+Ở các trường hợp khó (hàng 3-4, Abyssinian\_220 ngược sáng và american\_bulldog\_39 có quả bóng bên cạnh), cả ba mô hình đều gặp khó khăn — quả bóng nâu bị DINOv2 phân vào lớp pet do màu tương đồng. Điều này cho thấy \textbf{features chỉ có thể "thấy" những gì xuất hiện trong reference}: nếu reference không có ví dụ về đồ vật cạnh con vật, mô hình sẽ ghép nhầm patch có texture gần giống.
+
+Để nhấn mạnh điểm \textbf{emergence} của KMeans (không dùng nhãn), Hình \ref{fig:seg_emergence} so sánh trực tiếp KMeans trên patch features của DINOv2-B và ViT-B/16-IN trên 3 ảnh:
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.85\textwidth]{figures/seg_clustering_emergence.png}
+    \caption{KMeans ($k=3$) trên patch features — DINOv2 (SSL) phân biệt foreground/background rõ rệt hơn ViT-B/16 ImageNet.}
+    \label{fig:seg_emergence}
+\end{figure}
+
+Có thể thấy rõ cluster của DINOv2-B tập trung gọn vào con vật trong khi cluster của ViT-B/16-IN lan tỏa sang nền hoặc bị "vỡ" thành nhiều mảnh nhỏ. Đây là minh chứng định tính bổ sung cho con số 7 điểm mIoU mà DINOv2 ăn đứt baseline.
+
+\subsection{Kết luận §2.2}
+Thực nghiệm zero-shot segmentation đã củng cố mạnh mẽ tuyên bố cốt lõi của paper DINOv2: \textbf{patch features từ học tự giám sát quy mô lớn có thể dùng trực tiếp cho dense task}, không cần fine-tune, không cần segmentation head, và không cần một mẫu có nhãn nào (ở chế độ clustering). Với cùng pipeline và cùng số tham số, DINOv2 vượt baseline ViT-B/16 supervised khoảng 7 điểm mIoU. Quan trọng hơn, KMeans thuần túy trên patch features của DINOv2 đã tự sinh ra ranh giới đối tượng — một tính chất "emergence" mà supervised ViT không có. Đây là tiền đề trực tiếp cho các ứng dụng segmentation ở chương kế tiếp, đặc biệt trong các miền dữ liệu thiếu nhãn như y tế hay nông nghiệp.

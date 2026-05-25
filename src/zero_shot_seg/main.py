@@ -16,24 +16,14 @@ import torch
 from .classes import OXFORD_PET_TRIMAP_CLASSES
 from .data import OxfordPetSegDataset, denormalize
 from .feature_extractor import DINOv2DenseExtractor
+from .metrics import segmentation_metrics
 from .segmenter import ClusteringSegmenter, PrototypeZeroShotSegmenter
 from .visualize import labels_to_color, overlay_segmentation
 
 
 def mean_iou(pred: torch.Tensor, target: torch.Tensor, num_classes: int) -> float:
-    """mIoU tính trực tiếp trên tensor để không cần sklearn."""
-    pred = pred.flatten()
-    target = target.flatten()
-    ious = []
-    for c in range(num_classes):
-        p = pred == c
-        t = target == c
-        union = (p | t).sum().item()
-        if union == 0:
-            continue
-        inter = (p & t).sum().item()
-        ious.append(inter / union)
-    return float(np.mean(ious)) if ious else 0.0
+    """Wrapper giữ tương thích CLI cũ — gọi `metrics.segmentation_metrics`."""
+    return segmentation_metrics(pred, target, num_classes)["mIoU"]
 
 
 def run_prototype(args, extractor, dataset):
