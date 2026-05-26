@@ -54,8 +54,36 @@
 \tableofcontents
 \newpage
 
+\renewcommand{\listfigurename}{Danh mục hình ảnh}
+\listoffigures
+\newpage
+
+\renewcommand{\listtablename}{Danh mục bảng}
+\listoftables
+\newpage
+
 \input{chapter1/chapter1.tex}
 \input{chapter2/chapter2.tex}
 \input{chapter3/chapter3.tex}
+
+\renewcommand{\bibname}{Tài liệu tham khảo}
+\begin{thebibliography}{9}
+
+\bibitem{dinov2}
+Oquab, M., Darcet, T., Moutakanni, T., Vo, H., Szafraniec, M., Khalidov, V., ... \& Bojanowski, P. (2023).
+\textit{DINOv2: Learning Robust Visual Features without Supervision}.
+arXiv preprint arXiv:2304.07193.
+
+\bibitem{dino}
+Caron, M., Touvron, H., Misra, I., Jégou, H., Mairal, J., Bojanowski, P., \& Joulin, A. (2021).
+\textit{Emerging properties in self-supervised vision transformers}.
+In Proceedings of the IEEE/CVF international conference on computer vision (pp. 9650-9660).
+
+\bibitem{vit}
+Dosovitskiy, A., Beyer, L., Kolesnikov, A., Weissenborn, D., Zhai, X., Unterthiner, T., ... \& Houlsby, N. (2020).
+\textit{An image is worth 16x16 words: Transformers for image recognition at scale}.
+arXiv preprint arXiv:2010.11929.
+
+\end{thebibliography}
 
 \end{document}

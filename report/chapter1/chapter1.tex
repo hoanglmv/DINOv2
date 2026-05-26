@@ -54,12 +54,12 @@ Thứ hai, DINOv2 xuất phát từ nhận định rằng dữ liệu lớn chư
 
 Thứ ba, mục tiêu của DINOv2 là tạo ra một visual backbone có thể dùng trực tiếp như frozen feature extractor. Nếu thành công, cùng một encoder có thể phục vụ nhiều tác vụ như classification, segmentation, depth estimation, retrieval hoặc video understanding chỉ với một head đơn giản ở phía trên.
 
-\begin{figure}[h]
+\begin{table}[h]
     \centering
     \includegraphics[width=0.9\textwidth]{figures/table1.png}
     \caption{So sánh nguồn dữ liệu pretraining: LVD-142M cho kết quả tốt hơn dữ liệu uncurated và thường vượt ImageNet-22k trên nhiều benchmark ngoài ImageNet.}
     \label{tab:1.1}
-\end{figure}
+\end{table}
 
 \subsection{Ý nghĩa của bài toán}
 Nếu DINOv2 thành công, mô hình sẽ cung cấp một visual foundation backbone có khả năng tái sử dụng cao. Điều này giúp giảm chi phí huấn luyện lại, giảm phụ thuộc vào dữ liệu gán nhãn, đồng thời mở đường cho các hệ thống AI đa phương thức trong đó đặc trưng ảnh có thể được sử dụng linh hoạt giống như biểu diễn văn bản trong NLP.
@@ -133,22 +133,22 @@ DINOv2 dùng Sinkhorn-Knopp centering cho output của teacher nhằm tránh col
 \subsubsection{KoLeo regularizer}
 KoLeo regularizer khuyến khích các vector đặc trưng phân bố đều hơn trong không gian embedding. Nếu các đặc trưng bị tụ quá gần nhau, regularizer sẽ phạt mạnh. Do đó, KoLeo đặc biệt có ích cho các tác vụ truy xuất ảnh hoặc nearest-neighbor search, nơi khoảng cách giữa embedding rất quan trọng.
 
-\begin{figure}[h]
+\begin{table}[h]
     \centering
     \includegraphics[width=0.8\textwidth]{figures/table2.png}
     \caption{Ablation của KoLeo loss và masked image modeling: KoLeo cải thiện retrieval, còn MIM/iBOT giúp cải thiện tác vụ dense prediction như segmentation.}
     \label{tab:1.2}
-\end{figure}
+\end{table}
 
 \subsubsection*{Bước 4: Recipe huấn luyện khi scale lớn}
 Ngoài objective chính, DINOv2 thêm nhiều thay đổi nhỏ nhưng quan trọng để scale ổn định. Bảng 1.3 cho thấy các thành phần được thêm dần từ iBOT đến DINOv2. Không phải mọi thay đổi đều tăng đồng thời cả k-NN và linear accuracy, nhưng tổng thể chúng giúp quá trình huấn luyện ổn định hơn và tăng chất lượng frozen features.
 
-\begin{figure}[h]
+\begin{table}[h]
     \centering
     \includegraphics[width=0.8\textwidth]{figures/table3.png}
     \caption{Ablation recipe huấn luyện từ iBOT đến DINOv2. Các thay đổi được thêm tuần tự để cải thiện chất lượng đặc trưng và độ ổn định khi scale.}
     \label{tab:1.3}
-\end{figure}
+\end{table}
 
 \subsubsection*{Bước 5: High-resolution adaptation}
 Các tác vụ mức pixel như segmentation hoặc depth estimation cần giữ lại chi tiết nhỏ trong ảnh. Tuy nhiên, huấn luyện toàn bộ quá trình ở độ phân giải cao rất tốn chi phí. DINOv2 giải quyết bằng cách train phần lớn thời gian ở độ phân giải thấp hơn, sau đó tăng độ phân giải lên 518×518 trong một giai đoạn ngắn cuối pretraining. Cách này gần đạt chất lượng của huấn luyện high-resolution toàn thời gian nhưng tiết kiệm compute hơn nhiều.
@@ -189,60 +189,60 @@ Kết quả chính của DINOv2 là self-supervised pretraining, nếu được 
 \subsection{Kết quả trên ImageNet-1k}
 Trên ImageNet-1k với linear probe trên frozen features, DINOv2 ViT-g/14 đạt 86.5\% top-1 accuracy, cao hơn OpenCLIP ViT-G/14 86.2\% và EVA-CLIP ViT-g/14 86.4\%. Trên ImageNet-ReaL, DINOv2 ViT-g/14 đạt 89.6\%, và trên ImageNet-V2 đạt 78.4\%. Điều này cho thấy DINOv2 không chỉ khớp tốt validation set gốc mà còn tổng quát tốt hơn sang các biến thể đánh giá khác.
 
-\begin{figure}[h]
+\begin{table}[h]
     \centering
     \includegraphics[width=0.9\textwidth]{figures/table4.png}
     \caption{Linear evaluation trên ImageNet-1k: DINOv2 ViT-g/14 đạt 86.5\% linear accuracy và cạnh tranh trực tiếp với các mô hình weakly-supervised/text-guided.}
     \label{tab:1.4}
-\end{figure}
+\end{table}
 
 Khi fine-tuning backbone trên ImageNet-1k, hiệu năng của ViT-g/14 tăng từ 86.5\% lên 88.5\% ở độ phân giải 224 và từ 86.7\% lên 88.9\% ở độ phân giải 448. Mức tăng này cho thấy fine-tuning vẫn giúp cải thiện, nhưng không bắt buộc để đạt hiệu năng cao; frozen features của DINOv2 đã đủ mạnh để dùng trực tiếp.
 
-\begin{figure}[h]
+\begin{table}[h]
     \centering
     \includegraphics[width=0.9\textwidth]{figures/table5.png}
     \caption{Fine-tuning trên ImageNet-1k: DINOv2 vẫn cải thiện khi fine-tune, nhưng mức tăng vừa phải cho thấy frozen features đã rất mạnh.}
     \label{tab:1.5}
-\end{figure}
+\end{table}
 
 \subsection{Robustness và domain generalization}
 Trên các benchmark domain shift như ImageNet-A, ImageNet-R, ImageNet-C và ImageNet-Sketch, DINOv2 vượt xa các SSL baseline trước đó. Ví dụ, ViT-g/14 đạt 75.9\% trên ImageNet-A, trong khi iBOT ViT-L/16 chỉ đạt 41.5\%. Với ImageNet-C, chỉ số càng thấp càng tốt, DINOv2 ViT-g/14 đạt 28.2, tốt hơn cả OpenCLIP ViT-G/14 45.3. Điều này chứng minh đặc trưng của DINOv2 không quá phụ thuộc vào phân phối ImageNet chuẩn.
 
-\begin{figure}[h]
+\begin{table}[h]
     \centering
     \includegraphics[width=0.9\textwidth]{figures/table6.png}
     \caption{Domain generalization: DINOv2 cải thiện mạnh so với SSL trước đó, đặc biệt trên ImageNet-A và ImageNet-C.}
     \label{tab:1.6}
-\end{figure}
+\end{table}
 
 \subsection{Phân loại ảnh/video ngoài ImageNet}
 DINOv2 cũng được đánh giá trên các tập fine-grained và video. Với iNaturalist 2018/2021, ViT-g/14 đạt 81.6\% và 85.7\%, cao hơn OpenCLIP ViT-G/14 lần lượt 73.0\% và 76.0\%. Với video, DINOv2 đạt 78.4\% trên Kinetics-400 và 91.2\% trên UCF-101, ngang hoặc nhỉnh hơn OpenCLIP ở các tập này. Kết quả này đáng chú ý vì DINOv2 không được huấn luyện trực tiếp trên video nhưng đặc trưng ảnh vẫn chuyển giao tốt sang action recognition.
 
-\begin{figure}[h]
+\begin{table}[h]
     \centering
     \includegraphics[width=0.9\textwidth]{figures/table7.png}
     \caption{Linear evaluation trên các benchmark phân loại ảnh và video: DINOv2 tổng quát tốt sang fine-grained classification và video understanding.}
     \label{tab:1.7}
-\end{figure}
+\end{table}
 
 \subsection{Dense recognition: segmentation và depth estimation}
 Một điểm mạnh quan trọng của DINOv2 là chất lượng patch-level features. Với semantic segmentation, ViT-g/14 đạt 49.0 mIoU trên ADE20K ở thiết lập linear và 53.0 với multi-scale; trên CityScapes đạt 71.3/81.0; trên Pascal VOC đạt 83.0/86.2. Những con số này cho thấy frozen features của DINOv2 giữ được thông tin cục bộ đủ tốt để tạo mask phân đoạn mà không cần fine-tuning toàn bộ backbone.
 
-\begin{figure}[h]
+\begin{table}[h]
     \centering
     \includegraphics[width=0.9\textwidth]{figures/table8.png}
     \caption{Semantic segmentation với frozen features: DINOv2 đạt kết quả mạnh trên ADE20K, CityScapes và Pascal VOC.}
     \label{tab:1.8}
-\end{figure}
+\end{table}
 
 Với monocular depth estimation, chỉ số RMSE càng thấp càng tốt. DINOv2 ViT-g/14 đạt 0.344/0.298/0.279 trên NYUd tùy thiết lập, 2.62/2.35/2.11 trên KITTI và 0.402/0.362/0.338 trong thiết lập chuyển miền NYUd → SUN RGB-D. Điều này cho thấy patch features chứa thông tin hình học và cấu trúc không gian, dù mô hình không được huấn luyện bằng nhãn độ sâu.
 
-\begin{figure}[h]
+\begin{table}[h]
     \centering
     \includegraphics[width=0.9\textwidth]{figures/table9.png}
     \caption{Depth estimation với frozen features: DINOv2 cải thiện rõ rệt so với OpenCLIP, MAE, DINO và iBOT; chỉ số thấp hơn là tốt hơn.}
     \label{tab:1.9}
-\end{figure}
+\end{table}
 
 \subsection{Kết quả định tính}
 Các ví dụ định tính cho thấy DINOv2 tạo ra segmentation và depth map mượt hơn, ít nhiễu hơn so với OpenCLIP-G trong nhiều trường hợp. Với ảnh ngoài phân phối huấn luyện như tranh, ký họa hoặc ảnh động vật, DINOv2 vẫn có khả năng tách vùng chính và ước lượng cấu trúc không gian hợp lý. Điều này củng cố nhận định rằng đặc trưng học được không chỉ ghi nhớ nhãn lớp mà còn nắm bắt cấu trúc thị giác tổng quát.
