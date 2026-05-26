@@ -122,7 +122,7 @@ Ba feature extractor được so sánh theo cùng pipeline (chỉ thay backbone)
     \item \textbf{ViT-B/16 (IN-1K)} (huấn luyện có giám sát trên ImageNet-1K): baseline đối xứng với §2.1, đại diện cho phương pháp truyền thống.
 \end{itemize}
 
-\textbf{Cấu hình chung:} kích thước ảnh 224$\times$224 (bội số chung của patch 14 và 16), normalize theo ImageNet mean/std, đánh giá trên CPU. \textbf{Metrics:} mean IoU (mIoU) và pixel accuracy, kèm IoU phân tách theo từng class. Triển khai chi tiết: \texttt{src/zero\_shot\_seg/evaluate.py}.
+\textbf{Cấu hình chung:} kích thước ảnh 224$\times$224 (bội số chung của patch 14 và 16), normalize theo ImageNet mean/std, đánh giá trên CPU. \textbf{Metrics:} mean IoU (mIoU) và pixel accuracy, kèm IoU phân tách theo từng class. Triển khai chi tiết: \path{src/zero_shot_seg/evaluate.py}.
 
 \subsection{Kết quả định lượng}
 Bảng \ref{tab:seg_results} và Hình \ref{fig:seg_miou} tổng hợp mIoU và pixel accuracy của 6 cấu hình. Hình \ref{fig:seg_per_class} mở rộng theo từng class cho phương pháp Prototype.
