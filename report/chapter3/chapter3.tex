@@ -1,13 +1,15 @@
 \chapter{ĐÁNH GIÁ VÀ TƯ DUY TÍCH CỰC}
 
-\section{Điểm mạnh của phương pháp}
+\section{Đánh giá thực nghiệm Phân loại ảnh (§2.1)}
+
+\subsection{Điểm mạnh của phương pháp}
 Dựa trên kết quả thực nghiệm với tập dữ liệu y tế SkinCancerMNIST, có thể rút ra những điểm mạnh cốt lõi của DINOv2:
 \begin{itemize}
     \item \textbf{Đặc trưng "Out-of-the-box" sâu sắc:} Khác với các phương pháp SSL cũ, DINOv2 cung cấp một bộ trọng số cực kỳ chất lượng. Ngay cả khi chưa hề nhìn thấy ảnh nội soi da liễu trong quá trình huấn luyện, mô hình vẫn trích xuất được những vector đặc trưng có khả năng phân tách cao. Điều này giúp lớp Linear Probe hội tụ nhanh chóng và hiệu quả hơn hẳn so với việc tái sử dụng đặc trưng từ mô hình ViT được huấn luyện có giám sát (Supervised) trên ImageNet.
     \item \textbf{Tính tổng quát (Generalization) vượt trội:} Khi so sánh cùng một kiến trúc Vision Transformer, DINOv2 (học không giám sát) tỏ ra vượt trội so với ViT (học có giám sát) trong việc hiểu các chi tiết tinh vi về kết cấu (texture) của tổn thương da. ViT học trên ImageNet thường tập trung vào các đặc trưng nhận diện vật thể lớn (shape bias), do đó khi chuyển sang ảnh y tế, độ biểu diễn đặc trưng không thể sánh bằng sự hiểu biết chi tiết ở mức độ cục bộ (local features) của DINOv2.
 \end{itemize}
 
-\section{Điểm hạn chế và Thất bại}
+\subsection{Điểm hạn chế và Thất bại}
 Dù mạnh mẽ, phương pháp vẫn tồn tại những rào cản nhất định:
 \begin{itemize}
     \item \textbf{Chi phí huấn luyện ban đầu khổng lồ:} Để có được các đặc trưng "vạn năng", Meta AI đã phải dùng đến hàng ngàn GPU để huấn luyện trên 142 triệu hình ảnh. Do đó, việc tự xây dựng một mô hình tương tự DINOv2 từ đầu đối với các nhóm nghiên cứu nhỏ là bất khả thi.
@@ -15,10 +17,32 @@ Dù mạnh mẽ, phương pháp vẫn tồn tại những rào cản nhất đ�
     \item \textbf{Thiếu khả năng giải thích (Interpretability):} Trong y tế, việc hiểu tại sao mô hình đưa ra quyết định là tối quan trọng. DINOv2 cung cấp các vector đặc trưng dày đặc nhưng lại khó để bác sĩ hiểu được lớp Linear Probe đang tập trung vào vùng nào của tổn thương da nếu không sử dụng thêm các công cụ như Grad-CAM hoặc Attention Maps.
 \end{itemize}
 
-\section{Khả năng áp dụng thực tế}
-Từ bài báo DINOv2 và thực nghiệm trên SkinCancerMNIST, tính ứng dụng thực tế của mô hình là rất lớn:
+\section{Đánh giá thực nghiệm Phân đoạn ảnh Zero-Shot (§2.2)}
+
+\subsection{Điểm mạnh của phương pháp}
+Kết quả zero-shot segmentation trên Oxford-IIIT Pet làm nổi bật những điểm mạnh mà bài toán phân loại đơn thuần ở §2.1 chưa cho phép quan sát được:
 \begin{itemize}
-    \item \textbf{Hỗ trợ Chẩn đoán Y khoa (Medical Imaging):} Dữ liệu y tế (X-quang, MRI, nội soi) rất phong phú nhưng dữ liệu được gán nhãn bởi chuyên gia lại cực kỳ khan hiếm. DINOv2 mở ra tiềm năng sử dụng trực tiếp các ảnh không nhãn để tạo nền tảng, sau đó chỉ cần một lượng rất nhỏ ảnh có nhãn để huấn luyện lớp Linear Head.
-    \item \textbf{Nông nghiệp thông minh:} Trích xuất đặc trưng của bề mặt lá cây để phát hiện sâu bệnh, phân loại các loại cỏ dại mà không cần tốn công sức thu thập hàng vạn ảnh gán nhãn cho từng khu vực địa lý.
-    \item \textbf{Thị giác Robot và Xe tự lái:} Nhờ khả năng phân đoạn ngữ nghĩa (Semantic Segmentation) và bảo toàn cấu trúc không gian cực tốt, DINOv2 có thể đóng vai trò là "đôi mắt" cốt lõi giúp xe tự lái hoặc robot hiểu sâu sắc về độ sâu và hình học của môi trường xung quanh.
+    \item \textbf{Patch features đủ mạnh cho dense task mà không cần huấn luyện:} Đây là minh chứng quan trọng nhất cho tuyên bố cốt lõi của paper DINOv2. Toàn bộ pipeline được vận hành \textit{training-free} — không tính bất kỳ gradient nào, không có segmentation head — vậy mà DINOv2-B vẫn đạt $61.90\%$ mIoU theo phương pháp Prototype, vượt baseline ViT-B/16 (cùng kích thước, học có giám sát trên ImageNet) khoảng \textbf{7 điểm mIoU}. Khoảng cách này lớn hơn rất nhiều so với chênh lệch $\approx 2.6\%$ ở bài toán phân loại §2.1, phản ánh rằng ưu thế thực sự của DINOv2 nằm ở \textit{chất lượng patch-level features} — thứ mà supervised ViT vốn phải hy sinh khi tối ưu CLS token cho classification.
+    \item \textbf{Tính chất "Object-centric emergence":} Khi chạy Spherical KMeans với $k=3$ trên patch features của DINOv2 mà \textbf{không sử dụng bất kỳ nhãn nào}, ranh giới giữa con vật và nền vẫn xuất hiện rõ nét (đạt $50.31\%$ mIoU cho DINOv2-B). Trong khi đó, cluster của ViT-B/16-IN lan tỏa, vỡ thành nhiều mảnh không có ý nghĩa ngữ nghĩa. Đây là tính chất mà supervised ViT không có và là bằng chứng định tính mạnh mẽ cho khả năng "hiểu cấu trúc đối tượng" mà SSL ở quy mô lớn tự sinh ra.
+    \item \textbf{Hiệu quả tham số vượt mong đợi:} Mô hình DINOv2-S chỉ với $\sim$21M tham số gần như ngang ngửa DINOv2-B ($\sim$86M) ở phương pháp Prototype ($62.39\%$ vs $61.90\%$ mIoU). Điều này mở ra khả năng triển khai mô hình SSL cho dense task trên các thiết bị có tài nguyên hạn chế (edge devices, robot), điều rất khó đạt được với các mô hình segmentation chuyên dụng truyền thống.
+    \item \textbf{Pipeline rất nhẹ và linh hoạt:} Chỉ cần 10 ảnh reference có nhãn để xây prototype, hoặc thậm chí 0 ảnh có nhãn ở chế độ clustering. So với việc gán nhãn pixel-level cho hàng nghìn ảnh để huấn luyện một U-Net hay Mask R-CNN, đây là sự khác biệt về mặt chi phí ở mức quy mô khác hẳn.
+\end{itemize}
+
+\subsection{Điểm hạn chế và Thất bại}
+Tuy nhiên, các thí nghiệm cũng phơi bày một số giới hạn mà chỉ bài toán dense mới làm rõ:
+\begin{itemize}
+    \item \textbf{Giới hạn độ phân giải ở mức patch:} Class \textit{border} đạt IoU rất thấp ($\sim$30\% với Prototype, gần $0\%$ với Clustering). Nguyên nhân nằm ở việc patch grid có kích thước $14 \times 14$ hoặc $16 \times 16$ pixel, trong khi ranh giới giữa con vật và nền thường chỉ rộng 1-2 pixel. Patch features không thể phân biệt được những vùng mỏng như vậy nếu chỉ upsample bằng bilinear. Đây không phải hạn chế riêng của DINOv2 mà là hệ quả cấu trúc của Vision Transformer, nhưng nó hạn chế trực tiếp khả năng ứng dụng vào các bài toán yêu cầu segment chính xác đường biên (ví dụ: phẫu thuật, đo lường kích thước tổn thương).
+    \item \textbf{Phụ thuộc vào chất lượng và phạm vi của reference:} Trong các failure case (american\_bulldog\_39 có quả bóng nâu bên cạnh), mô hình gán nhầm quả bóng vào lớp \textit{pet} chỉ vì texture và màu sắc tương đồng. Điều này cho thấy DINOv2 "chỉ thấy được những gì đã có trong reference": nếu tập 10 ảnh tham chiếu không chứa bối cảnh phong phú, mô hình sẽ tổng quát hóa kém. Đây là rào cản khi triển khai vào môi trường thực tế nơi cảnh nền cực kỳ đa dạng.
+    \item \textbf{Vẫn nhạy cảm với điều kiện chụp khó:} Ảnh ngược sáng (Abyssinian\_220) khiến cả ba mô hình đều khó tách foreground/background — chứng tỏ tuy patch features ổn định hơn supervised ViT nhưng chúng vẫn chưa thực sự "bất biến" với ánh sáng và contrast. Trong các ứng dụng y tế hoặc nông nghiệp ngoài trời, đây là yếu tố cần được kiểm soát bằng tiền xử lý hoặc augmentation bổ sung.
+    \item \textbf{Phương pháp Clustering vẫn ngầm cần nhãn để gán cluster$\rightarrow$class:} Dù phần unsupervised đẹp về mặt khái niệm, bước \textit{greedy IoU matching} cuối cùng vẫn dùng mask của 10 ảnh reference để gán nhãn cho cluster. Vì vậy, gọi đây là "hoàn toàn không có nhãn" là không chính xác — đúng hơn nên gọi là \textit{label-efficient}. Trong bài toán thực sự không có một mask ground-truth nào, cần một bước thủ công khác để gán ngữ nghĩa cho từng cluster.
+    \item \textbf{Scale-up không tự động cải thiện kết quả:} Bất ngờ là DINOv2-B \textbf{kém hơn} DINOv2-S $0.5$ điểm mIoU ở Prototype. Điều này gợi ý rằng việc chọn kích thước mô hình cần dựa trên đặc tính bài toán (số class, độ phức tạp scene), không phải cứ "to hơn là tốt hơn". Việc lựa chọn mô hình SSL phù hợp cho dense task vẫn là một bài toán mở.
+\end{itemize}
+
+\section{Khả năng áp dụng thực tế}
+Tổng hợp kết quả từ cả hai thực nghiệm phân loại (§2.1) và phân đoạn zero-shot (§2.2), tính ứng dụng thực tế của DINOv2 trải rộng trên nhiều lĩnh vực:
+\begin{itemize}
+    \item \textbf{Hỗ trợ Chẩn đoán Y khoa (Medical Imaging):} Dữ liệu y tế (X-quang, MRI, nội soi) rất phong phú nhưng dữ liệu được gán nhãn bởi chuyên gia lại cực kỳ khan hiếm. DINOv2 mở ra tiềm năng kép: (1) phân loại bệnh lý chỉ cần thêm Linear Head với rất ít ảnh có nhãn (như §2.1 đã chứng minh trên SkinCancerMNIST), và (2) phân đoạn tổn thương ở mức zero-shot/few-shot dựa trên một vài ảnh tham chiếu, giảm mạnh thời gian gán nhãn pixel-level vốn cực kỳ tốn kém với bác sĩ.
+    \item \textbf{Nông nghiệp thông minh:} Trích xuất đặc trưng của bề mặt lá cây để phát hiện sâu bệnh, phân loại các loại cỏ dại mà không cần tốn công sức thu thập hàng vạn ảnh gán nhãn cho từng khu vực địa lý. Đặc biệt, khả năng object-centric emergence ở §2.2 cho phép phân đoạn vùng bệnh trên lá chỉ với vài ảnh mẫu — phù hợp cho triển khai trên drone hoặc thiết bị di động ngoài đồng ruộng.
+    \item \textbf{Thị giác Robot và Xe tự lái:} Nhờ khả năng phân đoạn ngữ nghĩa (Semantic Segmentation) và bảo toàn cấu trúc không gian cực tốt — được kiểm chứng trực tiếp qua kết quả mIoU vượt trội ở §2.2 — DINOv2 có thể đóng vai trò là "đôi mắt" cốt lõi giúp xe tự lái hoặc robot hiểu sâu sắc về độ sâu và hình học của môi trường xung quanh. Việc DINOv2-S đủ tốt cho dense task càng củng cố tính khả thi trên các hệ thống nhúng (embedded).
+    \item \textbf{Tìm kiếm và Truy xuất ảnh (Image Retrieval):} Vector đặc trưng chất lượng cao của DINOv2 có thể được dùng trực tiếp làm cơ sở cho hệ thống tìm kiếm ảnh theo nội dung, gắn kết với các pipeline tìm kiếm ngữ nghĩa trong thương mại điện tử, kho ảnh y tế, hoặc lưu trữ tài sản số (digital asset management).
 \end{itemize}
