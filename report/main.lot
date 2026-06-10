@@ -1,17 +1,17 @@
 \babel@toc {vietnamese}{}\relax 
 \addvspace {10\p@ }
 \contentsline {table}{\numberline {1.1}{\ignorespaces So sánh nguồn dữ liệu pretraining: LVD-142M cho kết quả tốt hơn dữ liệu uncurated và thường vượt ImageNet-22k trên nhiều benchmark ngoài ImageNet.}}{8}{table.1.1}%
-\contentsline {table}{\numberline {1.2}{\ignorespaces Tiến trình phát triển SSL và vị trí của DINOv2.}}{8}{table.1.2}%
-\contentsline {table}{\numberline {1.3}{\ignorespaces Ablation của KoLeo loss và masked image modeling: KoLeo cải thiện retrieval, còn MIM/iBOT giúp cải thiện tác vụ dense prediction như segmentation.}}{11}{table.1.3}%
-\contentsline {table}{\numberline {1.4}{\ignorespaces Ablation recipe huấn luyện từ iBOT đến DINOv2. Các thay đổi được thêm tuần tự để cải thiện chất lượng đặc trưng và độ ổn định khi scale.}}{11}{table.1.4}%
-\contentsline {table}{\numberline {1.5}{\ignorespaces Linear evaluation trên ImageNet-1k: DINOv2 ViT-g/14 đạt 86.5\% linear accuracy và cạnh tranh trực tiếp với các mô hình weakly-supervised/text-guided.}}{14}{table.1.5}%
-\contentsline {table}{\numberline {1.6}{\ignorespaces Fine-tuning trên ImageNet-1k: DINOv2 vẫn cải thiện khi fine-tune, nhưng mức tăng vừa phải cho thấy frozen features đã rất mạnh.}}{15}{table.1.6}%
-\contentsline {table}{\numberline {1.7}{\ignorespaces Domain generalization: DINOv2 cải thiện mạnh so với SSL trước đó, đặc biệt trên ImageNet-A và ImageNet-C.}}{15}{table.1.7}%
-\contentsline {table}{\numberline {1.8}{\ignorespaces Linear evaluation trên các benchmark phân loại ảnh và video: DINOv2 tổng quát tốt sang fine-grained classification và video understanding.}}{16}{table.1.8}%
-\contentsline {table}{\numberline {1.9}{\ignorespaces Semantic segmentation với frozen features: DINOv2 đạt kết quả mạnh trên ADE20K, CityScapes và Pascal VOC.}}{16}{table.1.9}%
-\contentsline {table}{\numberline {1.10}{\ignorespaces Depth estimation với frozen features: DINOv2 cải thiện rõ rệt so với OpenCLIP, MAE, DINO và iBOT; chỉ số thấp hơn là tốt hơn.}}{17}{table.1.10}%
-\contentsline {table}{\numberline {1.11}{\ignorespaces Tóm tắt các đóng góp chính của DINOv2.}}{19}{table.1.11}%
+\contentsline {table}{\numberline {1.2}{\ignorespaces Tiến trình phát triển SSL và vị trí của DINOv2.}}{9}{table.1.2}%
+\contentsline {table}{\numberline {1.3}{\ignorespaces Ablation của KoLeo loss và masked image modeling: KoLeo cải thiện retrieval, còn MIM/iBOT giúp cải thiện tác vụ dense prediction như segmentation.}}{12}{table.1.3}%
+\contentsline {table}{\numberline {1.4}{\ignorespaces Ablation recipe huấn luyện từ iBOT đến DINOv2. Các thay đổi được thêm tuần tự để cải thiện chất lượng đặc trưng và độ ổn định khi scale.}}{13}{table.1.4}%
+\contentsline {table}{\numberline {1.5}{\ignorespaces Linear evaluation trên ImageNet-1k: DINOv2 ViT-g/14 đạt 86.5\% linear accuracy và cạnh tranh trực tiếp với các mô hình weakly-supervised/text-guided.}}{16}{table.1.5}%
+\contentsline {table}{\numberline {1.6}{\ignorespaces Fine-tuning trên ImageNet-1k: DINOv2 vẫn cải thiện khi fine-tune, nhưng mức tăng vừa phải cho thấy frozen features đã rất mạnh.}}{17}{table.1.6}%
+\contentsline {table}{\numberline {1.7}{\ignorespaces Domain generalization: DINOv2 cải thiện mạnh so với SSL trước đó, đặc biệt trên ImageNet-A và ImageNet-C.}}{17}{table.1.7}%
+\contentsline {table}{\numberline {1.8}{\ignorespaces Linear evaluation trên các benchmark phân loại ảnh và video: DINOv2 tổng quát tốt sang fine-grained classification và video understanding.}}{18}{table.1.8}%
+\contentsline {table}{\numberline {1.9}{\ignorespaces Semantic segmentation với frozen features: DINOv2 đạt kết quả mạnh trên ADE20K, CityScapes và Pascal VOC.}}{18}{table.1.9}%
+\contentsline {table}{\numberline {1.10}{\ignorespaces Depth estimation với frozen features: DINOv2 cải thiện rõ rệt so với OpenCLIP, MAE, DINO và iBOT; chỉ số thấp hơn là tốt hơn.}}{19}{table.1.10}%
+\contentsline {table}{\numberline {1.11}{\ignorespaces Tóm tắt các đóng góp chính của DINOv2.}}{21}{table.1.11}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {2.1}{\ignorespaces Bảng tổng hợp kết quả hiệu năng của các mô hình}}{22}{table.2.1}%
-\contentsline {table}{\numberline {2.2}{\ignorespaces Kết quả zero-shot segmentation trên 150 ảnh test của Oxford-IIIT Pet (10 ảnh reference).}}{26}{table.2.2}%
+\contentsline {table}{\numberline {2.1}{\ignorespaces Bảng tổng hợp kết quả hiệu năng của các mô hình}}{24}{table.2.1}%
+\contentsline {table}{\numberline {2.2}{\ignorespaces Kết quả zero-shot segmentation trên 150 ảnh test của Oxford-IIIT Pet (10 ảnh reference).}}{28}{table.2.2}%
 \addvspace {10\p@ }

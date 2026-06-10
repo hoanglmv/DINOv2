@@ -1,10 +1,23 @@
 \chapter{BÀI TOÁN VÀ ĐỘNG LỰC CỦA BÀI BÁO DINOV2}
 
 \section{Bài toán}
-\subsection{Bối cảnh: đặc trưng thị giác là nền tảng của Computer Vision}
-Trong các hệ thống thị giác máy tính hiện đại, đặc trưng hình ảnh (visual features) đóng vai trò trung tâm. Chúng là biểu diễn số học của nội dung ảnh và thường được dùng làm đầu vào cho các tác vụ như phân loại ảnh, phát hiện vật thể, phân đoạn ngữ nghĩa, ước lượng độ sâu hoặc truy xuất ảnh. Vì vậy, chất lượng của visual features ảnh hưởng trực tiếp đến hiệu năng và khả năng tổng quát hóa của toàn bộ hệ thống phía sau.
+\subsection{Bối cảnh: dữ liệu thị giác lớn nhưng thiếu nhãn và nhu cầu mô hình nền tảng}
+Bối cảnh của DINOv2 xuất phát từ một thực tế cốt lõi: lượng ảnh có sẵn trên internet là khổng lồ và tăng không ngừng, nhưng phần lớn trong số đó \textbf{không có nhãn} hoặc không có caption chất lượng cao. Việc gán nhãn thủ công cho dữ liệu thị giác rất tốn kém, đòi hỏi nhiều công sức con người và gần như không thể mở rộng theo kịp tốc độ sinh dữ liệu. Hệ quả là một nghịch lý: dữ liệu thì dư thừa, nhưng tín hiệu giám sát (nhãn) lại khan hiếm. Điều này đặt ra nhu cầu học biểu diễn thị giác \textbf{trực tiếp từ ảnh thô}, không phụ thuộc vào nhãn người gán hay văn bản đi kèm.
+
+Trong xử lý ngôn ngữ tự nhiên (NLP), một bước ngoặt đã diễn ra khi người ta pretraining mô hình trên kho văn bản thô khổng lồ bằng các pretext objective (như language modeling) \emph{không cần giám sát}, từ đó tạo ra các biểu diễn tổng quát, độc lập với tác vụ (task-agnostic) và có thể dùng trực tiếp ``as-is''. Những mô hình như vậy được gọi là \emph{mô hình nền tảng} (foundation model)~\cite{foundation}. Một câu hỏi tự nhiên đặt ra cho thị giác máy tính: liệu có thể xây dựng một mô hình nền tảng tương tự cho ảnh, tức một backbone học từ lượng lớn ảnh không nhãn và sinh ra \emph{general-purpose visual features} dùng được ngay (out-of-the-box) cho nhiều tác vụ khác nhau hay không? Đây chính là động lực bối cảnh mà DINOv2 hướng tới.
+
+Trong các hệ thống thị giác máy tính, đặc trưng hình ảnh (visual features) đóng vai trò trung tâm: chúng là biểu diễn số học của nội dung ảnh và là đầu vào cho các tác vụ như phân loại ảnh, phát hiện vật thể, phân đoạn ngữ nghĩa, ước lượng độ sâu hoặc truy xuất ảnh. Vì vậy, chất lượng của visual features ảnh hưởng trực tiếp đến hiệu năng và khả năng tổng quát hóa của toàn bộ hệ thống phía sau. Khi không có nhãn để học có giám sát, bài toán trở thành: làm sao tạo ra được visual features đủ mạnh và tổng quát chỉ từ dữ liệu ảnh.
 
 Câu hỏi nghiên cứu cốt lõi mà DINOv2 đặt ra là: liệu self-supervised learning có thể tạo ra các đặc trưng thị giác tổng quát, không cần nhãn, và có thể dùng trực tiếp cho nhiều tác vụ thị giác khác nhau hay không?
+
+\subsection{Ý nghĩa của Self-Supervised Learning và Foundation Model}
+Hai khái niệm nền tảng để hiểu DINOv2 là \emph{self-supervised learning} và \emph{foundation model}.
+
+\textbf{Self-Supervised Learning (SSL).} SSL là hướng học biểu diễn trong đó tín hiệu giám sát được \emph{sinh ra từ chính dữ liệu} thay vì từ nhãn do con người gán. Mô hình giải một \emph{pretext task} (nhiệm vụ giả lập) được thiết kế khéo léo để buộc nó học các đặc trưng có ý nghĩa: ví dụ dự đoán phần ảnh bị che từ ngữ cảnh xung quanh, hoặc bắt biểu diễn của các phiên bản biến đổi (augmentation/crop) của cùng một ảnh phải nhất quán với nhau. Vì không cần nhãn, SSL có thể tận dụng kho ảnh khổng lồ không gán nhãn trên internet. Điểm này phân biệt SSL với hai hướng còn lại: học có giám sát (supervised) cần nhãn lớp cho từng ảnh, còn text-guided/weakly-supervised (ví dụ CLIP) cần các cặp ảnh--văn bản đã căn chỉnh.
+
+\textbf{Foundation Model.} Foundation model~\cite{foundation} là mô hình được pretrain trên một lượng dữ liệu rộng và đa dạng ở quy mô lớn, sao cho biểu diễn học được có thể \emph{tái sử dụng và thích ứng} cho nhiều tác vụ downstream khác nhau. Trong thị giác máy tính, một foundation model lý tưởng là một backbone sinh ra đặc trưng tổng quát, dùng được trực tiếp ở trạng thái \emph{frozen} (đóng băng trọng số) chỉ với một head đơn giản phía trên, thay vì phải fine-tuning lại toàn bộ cho mỗi tác vụ. Ý nghĩa thực tiễn rất lớn: chi phí huấn luyện được khấu hao một lần, giảm mạnh nhu cầu dữ liệu gán nhãn, và cho phép tái sử dụng đặc trưng ảnh một cách linh hoạt giống như cách text embedding được dùng phổ biến trong NLP.
+
+\textbf{Kết nối tới DINOv2.} DINOv2 nằm chính tại giao điểm của hai khái niệm trên: nó dùng \emph{self-supervised learning} ở quy mô lớn để xây dựng một \emph{visual foundation model}. Nói cách khác, DINOv2 trả lời cho câu hỏi liệu SSL có đủ mạnh để tạo ra một mô hình nền tảng thị giác cạnh tranh với các phương pháp dựa trên giám sát văn bản hay không.
 
 \subsection{Hạn chế của các hướng tiếp cận hiện tại}
 \subsubsection{Text-guided pretraining phụ thuộc vào caption}
@@ -119,19 +132,66 @@ DINOv2 sử dụng họ kiến trúc Vision Transformer (ViT), gồm nhiều kí
 Objective của DINOv2 có thể xem là sự kết hợp giữa DINO và iBOT, kèm một số sửa đổi để ổn định khi scale lớn.
 
 \subsubsection{Image-level objective theo DINO}
-DINO loss làm cho class token của student dự đoán phân phối prototype do teacher tạo ra từ một crop khác của cùng ảnh. Sau DINO head và softmax, student sinh phân phối $p_s$, teacher sinh phân phối $p_t$. Loss chính là cross-entropy. Ý nghĩa trực giác: dù nhìn các crop khác nhau của cùng một ảnh, student vẫn phải học biểu diễn ổn định, gần với teacher. Điều này giúp class token trở thành đặc trưng toàn ảnh mạnh.
+DINO loss làm cho class token của student dự đoán phân phối prototype do teacher tạo ra từ một crop khác của cùng ảnh. Class token được đưa qua một DINO head (MLP) để sinh ra vector ``prototype scores''; sau softmax, student cho phân phối $p_s$ còn teacher cho phân phối $p_t$ (kèm bước centering, xem bên dưới). Loss chính là cross-entropy giữa hai phân phối:
+\begin{equation}
+\mathcal{L}_{\mathrm{DINO}} = -\sum p_t \log p_s .
+\end{equation}
+Ở đây teacher được xây dựng bằng exponential moving average (EMA) của student. Ý nghĩa trực giác: dù nhìn các crop khác nhau của cùng một ảnh, student vẫn phải học biểu diễn ổn định, gần với teacher. Điều này giúp class token trở thành đặc trưng toàn ảnh mạnh.
 
 \subsubsection{Patch-level objective theo iBOT}
-Với iBOT, một số patch đầu vào của student bị mask, trong khi teacher vẫn nhìn thấy patch tương ứng. Student phải dự đoán representation/prototype của các patch bị che dựa trên ngữ cảnh còn lại. Thành phần này giúp mô hình học thông tin cục bộ, biên vật thể và cấu trúc không gian, rất quan trọng cho dense prediction như segmentation hoặc depth estimation.
+Với iBOT~\cite{ibot}, một số patch đầu vào của student bị mask, trong khi teacher vẫn nhìn thấy patch tương ứng. Student phải dự đoán phân phối prototype $p_{si}$ của các patch bị che, sao cho khớp với phân phối $p_{ti}$ mà teacher tạo ra cho chính các patch đó (qua iBOT head và các bước softmax/centering như trên). Loss iBOT là cross-entropy lấy tổng trên tập chỉ số $i$ của các patch bị mask:
+\begin{equation}
+\mathcal{L}_{\mathrm{iBOT}} = -\sum_i p_{ti} \log p_{si} .
+\end{equation}
+Thành phần này giúp mô hình học thông tin cục bộ, biên vật thể và cấu trúc không gian, rất quan trọng cho dense prediction như segmentation hoặc depth estimation.
 
 \subsubsection{Tách head cho DINO và iBOT}
 Trong iBOT gốc, DINO head và iBOT head có thể chia sẻ trọng số. Khi scale lên dữ liệu và mô hình lớn, DINOv2 nhận thấy tách riêng hai head cho image-level và patch-level objective hiệu quả hơn, vì hai objective học hai kiểu thông tin khác nhau.
 
 \subsubsection{Sinkhorn-Knopp centering}
-DINOv2 dùng Sinkhorn-Knopp centering cho output của teacher nhằm tránh collapse và cân bằng việc sử dụng các prototype. Student vẫn dùng softmax thông thường. Cách centering này giúp target của teacher ổn định hơn trong batch lớn.
+Thay cho bước softmax-centering kèm moving average của DINO, DINOv2 dùng Sinkhorn-Knopp (SK) centering theo SwAV~\cite{swav} cho output của teacher nhằm tránh collapse và cân bằng việc sử dụng các prototype. Gọi $S \in \mathbb{R}^{B \times K}$ là ma trận prototype scores của teacher trên một batch ($B$ ảnh, $K$ prototype). Khởi tạo $Q = \exp(S/\epsilon)$, sau đó lặp lại $3$ lần hai bước chuẩn hóa:
+\begin{equation}
+Q_{bk} \leftarrow \frac{Q_{bk}}{\sum_{b'} Q_{b'k}}
+\quad\text{(chuẩn hóa theo cột / prototype)},
+\qquad
+Q_{bk} \leftarrow \frac{Q_{bk}}{\sum_{k'} Q_{bk'}}
+\quad\text{(chuẩn hóa theo hàng / ảnh)} .
+\end{equation}
+Kết quả $Q$ xấp xỉ một ma trận doubly-stochastic; mỗi hàng $Q_{b\cdot}$ được dùng làm target $p_t$ cho ảnh tương ứng. Student vẫn dùng softmax thông thường. Cách centering này phân bổ đều việc sử dụng các prototype trong batch, giúp target của teacher ổn định hơn và tránh hiện tượng mọi ảnh dồn về một số ít prototype.
 
 \subsubsection{KoLeo regularizer}
-KoLeo regularizer khuyến khích các vector đặc trưng phân bố đều hơn trong không gian embedding. Nếu các đặc trưng bị tụ quá gần nhau, regularizer sẽ phạt mạnh. Do đó, KoLeo đặc biệt có ích cho các tác vụ truy xuất ảnh hoặc nearest-neighbor search, nơi khoảng cách giữa embedding rất quan trọng.
+KoLeo regularizer~\cite{koleo} khuyến khích các vector đặc trưng phân bố đều hơn trong không gian embedding. Với một batch gồm $n$ vector $(x_1, \dots, x_n)$ đã được chuẩn hóa $\ell_2$, KoLeo được định nghĩa qua khoảng cách tới láng giềng gần nhất của mỗi điểm:
+\begin{equation}
+\mathcal{L}_{\mathrm{koleo}} = -\frac{1}{n} \sum_{i=1}^{n} \log\big(d_{n,i}\big),
+\qquad
+d_{n,i} = \min_{j \neq i} \lVert x_i - x_j \rVert .
+\end{equation}
+Nếu các đặc trưng bị tụ quá gần nhau thì $d_{n,i}$ nhỏ và regularizer phạt mạnh, do đó mô hình bị thúc đẩy ``trải'' các embedding ra đều hơn. Vì vậy, KoLeo đặc biệt có ích cho các tác vụ truy xuất ảnh hoặc nearest-neighbor search, nơi khoảng cách giữa embedding rất quan trọng.
+
+Tổng hợp lại, objective huấn luyện kết hợp ba thành phần trên (KoLeo đóng vai trò regularizer với trọng số nhỏ $\lambda$):
+\begin{equation}
+\mathcal{L} = \mathcal{L}_{\mathrm{DINO}} + \mathcal{L}_{\mathrm{iBOT}} + \lambda\,\mathcal{L}_{\mathrm{koleo}} .
+\end{equation}
+
+Toàn bộ một bước huấn luyện tự giám sát của DINOv2, kết hợp các thành phần trên với cơ chế student--teacher và cập nhật EMA, được tóm tắt trong Thuật toán~\ref{alg:dinov2}.
+
+\begin{algorithm}[h]
+\caption{Một bước huấn luyện tự giám sát của DINOv2 (student--teacher)}
+\label{alg:dinov2}
+\begin{algorithmic}[1]
+\Require ảnh $x$; student $\theta_s$ và teacher $\theta_t$ (gồm backbone ViT, DINO head, iBOT head); hệ số EMA $m$; trọng số $\lambda$; learning rate $\eta$
+\Ensure cập nhật $\theta_s,\ \theta_t$
+\State Sinh $2$ global crops và $V$ local crops từ $x$ bằng augmentation
+\State Mask ngẫu nhiên một phần patch cho nhánh student (phục vụ iBOT)
+\State Teacher forward $2$ global crops; student forward toàn bộ crops
+\State $p_t \gets \textsc{SinkhornKnopp}(\text{prototype scores của teacher})$
+\State $p_s \gets \mathrm{softmax}(\text{prototype scores của student})$
+\State Tính $\mathcal{L}_{\mathrm{DINO}}$, $\mathcal{L}_{\mathrm{iBOT}}$ (trên các patch bị mask) và $\mathcal{L}_{\mathrm{koleo}}$
+\State $\mathcal{L} \gets \mathcal{L}_{\mathrm{DINO}} + \mathcal{L}_{\mathrm{iBOT}} + \lambda\,\mathcal{L}_{\mathrm{koleo}}$
+\State $\theta_s \gets \theta_s - \eta\,\nabla_{\theta_s}\mathcal{L}$ \Comment{cập nhật student bằng gradient descent}
+\State $\theta_t \gets m\,\theta_t + (1-m)\,\theta_s$ \Comment{teacher là EMA của student}
+\end{algorithmic}
+\end{algorithm}
 
 \begin{table}[h]
     \centering

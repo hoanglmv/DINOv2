@@ -1,19 +1,19 @@
 \babel@toc {vietnamese}{}\relax 
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {1.1}{\ignorespaces Quy trình xử lý dữ liệu của DINOv2: dữ liệu ảnh thô được embedding, khử trùng lặp và truy xuất theo độ tương đồng để tạo tập dữ liệu curated LVD-142M.}}{6}{figure.1.1}%
-\contentsline {figure}{\numberline {1.2}{\ignorespaces PCA visualization của patch features: các vùng tương ứng giữa những ảnh liên quan được mô hình nhận ra dù thay đổi tư thế, phong cách hoặc đối tượng.}}{7}{figure.1.2}%
-\contentsline {figure}{\numberline {1.3}{\ignorespaces Hiệu năng khi scale mô hình: DINOv2 cải thiện mạnh so với các SSL model trước đó và đạt mức cạnh tranh với weakly-supervised features trên nhiều nhóm tác vụ.}}{8}{figure.1.3}%
-\contentsline {figure}{\numberline {1.4}{\ignorespaces Ảnh hưởng của độ phân giải: huấn luyện 224 rồi chuyển sang độ phân giải cao trong giai đoạn ngắn cuối giúp cải thiện cả ImageNet-1k và ADE-20K với chi phí thấp hơn.}}{12}{figure.1.4}%
-\contentsline {figure}{\numberline {1.5}{\ignorespaces Hiệu quả của distillation: ViT-L/14 distilled từ ViT-g/14 vượt ViT-L/14 train từ scratch trên nhiều benchmark.}}{13}{figure.1.5}%
-\contentsline {figure}{\numberline {1.6}{\ignorespaces Kết quả định tính về segmentation và depth estimation với linear classifier trên frozen features.}}{18}{figure.1.6}%
-\contentsline {figure}{\numberline {1.7}{\ignorespaces Ví dụ ngoài phân phối: DINOv2 vẫn cho kết quả tương đối ổn trên tranh, ký họa và ảnh thuộc miền khác.}}{19}{figure.1.7}%
+\contentsline {figure}{\numberline {1.1}{\ignorespaces Quy trình xử lý dữ liệu của DINOv2: dữ liệu ảnh thô được embedding, khử trùng lặp và truy xuất theo độ tương đồng để tạo tập dữ liệu curated LVD-142M.}}{7}{figure.1.1}%
+\contentsline {figure}{\numberline {1.2}{\ignorespaces PCA visualization của patch features: các vùng tương ứng giữa những ảnh liên quan được mô hình nhận ra dù thay đổi tư thế, phong cách hoặc đối tượng.}}{8}{figure.1.2}%
+\contentsline {figure}{\numberline {1.3}{\ignorespaces Hiệu năng khi scale mô hình: DINOv2 cải thiện mạnh so với các SSL model trước đó và đạt mức cạnh tranh với weakly-supervised features trên nhiều nhóm tác vụ.}}{9}{figure.1.3}%
+\contentsline {figure}{\numberline {1.4}{\ignorespaces Ảnh hưởng của độ phân giải: huấn luyện 224 rồi chuyển sang độ phân giải cao trong giai đoạn ngắn cuối giúp cải thiện cả ImageNet-1k và ADE-20K với chi phí thấp hơn.}}{14}{figure.1.4}%
+\contentsline {figure}{\numberline {1.5}{\ignorespaces Hiệu quả của distillation: ViT-L/14 distilled từ ViT-g/14 vượt ViT-L/14 train từ scratch trên nhiều benchmark.}}{15}{figure.1.5}%
+\contentsline {figure}{\numberline {1.6}{\ignorespaces Kết quả định tính về segmentation và depth estimation với linear classifier trên frozen features.}}{20}{figure.1.6}%
+\contentsline {figure}{\numberline {1.7}{\ignorespaces Ví dụ ngoài phân phối: DINOv2 vẫn cho kết quả tương đối ổn trên tranh, ký họa và ảnh thuộc miền khác.}}{21}{figure.1.7}%
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {2.1}{\ignorespaces Tốc độ hội tụ (Validation Loss) của các mô hình trong quá trình huấn luyện}}{22}{figure.2.1}%
-\contentsline {figure}{\numberline {2.2}{\ignorespaces So sánh hiệu năng (Accuracy và F1-Score) trên tập Test}}{23}{figure.2.2}%
-\contentsline {figure}{\numberline {2.3}{\ignorespaces Ma trận nhầm lẫn (Confusion Matrix) của mô hình DINOv2 trên tập Test}}{24}{figure.2.3}%
-\contentsline {figure}{\numberline {2.4}{\ignorespaces Ma trận nhầm lẫn (Confusion Matrix) của mô hình ViT-B/16 trên tập Test}}{25}{figure.2.4}%
-\contentsline {figure}{\numberline {2.5}{\ignorespaces So sánh mIoU giữa ba backbone và hai phương pháp training-free.}}{26}{figure.2.5}%
-\contentsline {figure}{\numberline {2.6}{\ignorespaces IoU theo từng class (pet / background / border) cho phương pháp Prototype.}}{27}{figure.2.6}%
-\contentsline {figure}{\numberline {2.7}{\ignorespaces So sánh định tính: Original $\mid $ Ground truth $\mid $ DINOv2-B Prototype $\mid $ DINOv2-B Clustering $\mid $ ViT-B/16 Prototype.}}{28}{figure.2.7}%
-\contentsline {figure}{\numberline {2.8}{\ignorespaces KMeans ($k=3$) trên patch features — DINOv2 (SSL) phân biệt foreground/background rõ rệt hơn ViT-B/16 ImageNet.}}{29}{figure.2.8}%
+\contentsline {figure}{\numberline {2.1}{\ignorespaces Tốc độ hội tụ (Validation Loss) của các mô hình trong quá trình huấn luyện}}{24}{figure.2.1}%
+\contentsline {figure}{\numberline {2.2}{\ignorespaces So sánh hiệu năng (Accuracy và F1-Score) trên tập Test}}{25}{figure.2.2}%
+\contentsline {figure}{\numberline {2.3}{\ignorespaces Ma trận nhầm lẫn (Confusion Matrix) của mô hình DINOv2 trên tập Test}}{26}{figure.2.3}%
+\contentsline {figure}{\numberline {2.4}{\ignorespaces Ma trận nhầm lẫn (Confusion Matrix) của mô hình ViT-B/16 trên tập Test}}{27}{figure.2.4}%
+\contentsline {figure}{\numberline {2.5}{\ignorespaces So sánh mIoU giữa ba backbone và hai phương pháp training-free.}}{28}{figure.2.5}%
+\contentsline {figure}{\numberline {2.6}{\ignorespaces IoU theo từng class (pet / background / border) cho phương pháp Prototype.}}{29}{figure.2.6}%
+\contentsline {figure}{\numberline {2.7}{\ignorespaces So sánh định tính: Original $\mid $ Ground truth $\mid $ DINOv2-B Prototype $\mid $ DINOv2-B Clustering $\mid $ ViT-B/16 Prototype.}}{30}{figure.2.7}%
+\contentsline {figure}{\numberline {2.8}{\ignorespaces KMeans ($k=3$) trên patch features — DINOv2 (SSL) phân biệt foreground/background rõ rệt hơn ViT-B/16 ImageNet.}}{31}{figure.2.8}%
 \addvspace {10\p@ }
