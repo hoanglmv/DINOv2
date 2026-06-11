@@ -15,6 +15,7 @@
 \renewcommand{\algorithmicensure}{\textbf{Đầu ra:}}
 \usepackage{geometry}
 \geometry{a4paper, margin=1in}
+\usepackage{caption}
 
 \usepackage{tikz}
 \usetikzlibrary{calc}
@@ -57,6 +58,42 @@
         \vspace*{0.5cm}
     \end{center}
 \end{titlepage}
+
+\chapter*{Tóm tắt}
+\addcontentsline{toc}{chapter}{Tóm tắt}
+
+\section*{Tóm tắt dự án}
+
+Báo cáo này trình bày nghiên cứu và thực nghiệm về mô hình \textbf{DINOv2} --- một phương pháp học biểu diễn thị giác tự giám sát (self-supervised) tiên tiến được đề xuất bởi Meta AI Research. DINOv2 kế thừa và mở rộng từ DINO, kết hợp các kỹ thuật chắt lọc tri thức tự giám sát, học tương phản (iBOT), và điều chuẩn phân phối đặc trưng (KoLeo) trên tập dữ liệu hình ảnh quy mô lớn được tuyển chọn kỹ lưỡng. Mô hình đạt được các đặc trưng thị giác mạnh mẽ, tổng quát hóa tốt trên nhiều tác vụ downstream mà không cần nhãn dữ liệu trong quá trình huấn luyện.
+
+Trong dự án này, nhóm đã nghiên cứu kiến trúc Vision Transformer (ViT) nền tảng, phân tích pipeline huấn luyện tự giám sát của DINOv2, đồng thời tiến hành thực nghiệm đánh giá khả năng của mô hình trên các bài toán phân loại ảnh, phân đoạn ngữ nghĩa và trích xuất đặc trưng. Kết quả thực nghiệm cho thấy DINOv2 tạo ra các đặc trưng có chất lượng cao, cạnh tranh hoặc vượt trội so với các phương pháp có giám sát trên nhiều benchmark tiêu chuẩn.
+
+\vspace{1.5cm}
+
+\section*{Bảng đánh giá đóng góp thành viên}
+
+\begin{table}[h]
+    \centering
+    \renewcommand{\arraystretch}{1.5}
+    \begin{tabular}{|c|l|c|c|p{5.5cm}|}
+        \hline
+        \textbf{STT} & \textbf{Họ và tên} & \textbf{MSSV} & \textbf{Đóng góp} & \textbf{Nhiệm vụ chính} \\
+        \hline
+        1 & Vũ Minh Hoàng Tùng & 22022107 & 25\% & Nghiên cứu kiến trúc ViT, viết Chương 1 \\
+        \hline
+        2 & Lê Mai Việt Hoàng  & 22022191 & 25\% & Phân tích pipeline DINOv2, viết Chương 2 \\
+        \hline
+        3 & Tạ Đình Kiên       & 22022145 & 25\% & Triển khai thực nghiệm, viết Chương 3 \\
+        \hline
+        4 & Nguyễn Quốc Toản   & 22022175 & 25\% & Đánh giá kết quả, tổng hợp báo cáo \\
+        \hline
+        \multicolumn{3}{|c|}{\textbf{Tổng cộng}} & \textbf{100\%} & \\
+        \hline
+    \end{tabular}
+    \caption*{Bảng đánh giá mức độ đóng góp của từng thành viên}
+\end{table}
+
+\newpage
 
 \tableofcontents
 \newpage
